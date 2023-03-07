@@ -2,7 +2,7 @@
 
 
 #include "ChunkManager.h"
-
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AChunkManager::AChunkManager()
@@ -47,7 +47,7 @@ FVector2D AChunkManager::GetPlayerChunkPosition()
 TArray<FVector2D> AChunkManager::GetNeightBoorChunk()
 {
 	TArray<FVector2D> ProximityChunk;
-	FVector2D ChunkPosition = GetPlayerChunkPosition();
+	const FVector2D ChunkPosition = GetPlayerChunkPosition();
 	for (int X = -RangeNeedToBeLoad; X < RangeNeedToBeLoad; X++)
 	{
 		for (int Y = -RangeNeedToBeLoad; Y < RangeNeedToBeLoad; Y++)
@@ -64,6 +64,17 @@ void AChunkManager::GenerateChunk(FVector2D ChunkPosition)
 	Chunk->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 	AllPositionChunkLoad.Add(ChunkPosition);
 	ChargedChunk.Add(ChunkPosition,Chunk);
+
+	if (CheckIfChunkDataExist(ChunkPosition))
+	{
+		Chunk->GenerateChunk(GetChunkData(ChunkPosition));
+		UE_LOG(LogTemp, Warning, TEXT("DATA EXISTE: "));
+	}
+	else
+	{
+		Chunk->GenerateChunk(GetChunkData(ChunkPosition));
+		UE_LOG(LogTemp, Warning, TEXT("DATA PAS EXIST: "));
+	}
 }
 
 void AChunkManager::ManageChunkLoading()
@@ -104,9 +115,44 @@ void AChunkManager::ManageChunkLoading()
 		if (Chunk != nullptr)
 			if ((*Chunk) != nullptr)
 			{
+				SaveGame((*Chunk)->ChunkData, ChunkNeedToBeUnload[i]);
 				(*Chunk)->UnloadChunk();
 				ChargedChunk.Remove(ChunkNeedToBeUnload[i]);
 				AllPositionChunkLoad.Remove(ChunkNeedToBeUnload[i]);
 			}
 	}
+}
+
+bool AChunkManager::CheckIfChunkDataExist(FVector2d ChunkPosition)
+{
+	const FString ChunkSaveName = ChunkPosition.ToString();
+	USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(ChunkSaveName, 0);
+	SaveGameObject = Cast<UChunkSaveGame>(LoadedGame);
+	if (!SaveGameObject)
+	{
+		SaveGameObject = Cast<UChunkSaveGame>(UGameplayStatics::CreateSaveGameObject(UChunkSaveGame::StaticClass()));
+		SaveGameObject->ChunkData.ChunkPosition = ChunkPosition;
+		UGameplayStatics::SaveGameToSlot(SaveGameObject, ChunkSaveName, 0);
+		return false;
+	}
+		return true;
+}
+
+FChunkStruct AChunkManager::GetChunkData(FVector2d ChunkPosition)
+{
+	const FString ChunkSaveName = ChunkPosition.ToString();
+	USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(ChunkSaveName, 0);
+	SaveGameObject = Cast<UChunkSaveGame>(LoadedGame);
+
+	return SaveGameObject->ChunkData;
+}
+
+void AChunkManager::SaveGame(FChunkStruct Data, FVector2d ChunkPosition)
+{
+	const FString ChunkSaveName = ChunkPosition.ToString();
+	USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(ChunkSaveName, 0);
+	SaveGameObject = Cast<UChunkSaveGame>(LoadedGame);
+	SaveGameObject->ChunkData = Data;
+	
+	UGameplayStatics::SaveGameToSlot(SaveGameObject, ChunkSaveName, 0);
 }

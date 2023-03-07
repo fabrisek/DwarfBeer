@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "TileStruct.h"
+#include "ChunkStruct.h"
 #include <Kismet/GameplayStatics.h>
 #include "MeshInstanceManager.h"
 #include "FTile.h"
@@ -34,11 +34,10 @@ private:
 	int SizeChunk = 16;
 	UPROPERTY(EditDefaultsOnly, Category = "Chunk")
 	float DistanceCube = 100.0f;
+public:
 	UPROPERTY(EditDefaultsOnly, Category = "Grid")
-	TArray<FTileStruct> TilesArray;
-
-private:
-	void GenerateChunk();
+	FChunkStruct ChunkData;
+	void GenerateChunk(FChunkStruct Data);
 	UProceduralMeshComponent* MeshComp;
 
 public:

@@ -15,10 +15,10 @@ UCLASS()
 class ADwarfBarPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MonVecteur")
+	FVector MousePosition;
 	ADwarfBarPlayerController();
-
 	/** Time Threshold to know if it was a short press */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	float ShortPressThreshold;

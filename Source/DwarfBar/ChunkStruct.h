@@ -4,15 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "FTile.h"
-#include "TileStruct.generated.h"
+#include "ChunkStruct.generated.h"
 /**
  * 
  */
 USTRUCT(BlueprintType)
-struct FTileStruct
+struct FChunkStruct
 {
 	GENERATED_BODY();
 public:
+	UPROPERTY(EditDefaultsOnly, Category = "Grid")
+	FVector2D ChunkPosition;
 	UPROPERTY(EditDefaultsOnly, Category = "Grid")
 	TArray<FTile> TilesArray;
 };

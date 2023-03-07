@@ -6,6 +6,7 @@
 #include <Kismet/GameplayStatics.h>
 #include "GameFramework/Actor.h"
 #include "Chunk.h"
+#include "ChunkSaveGame.h"
 #include "ChunkManager.generated.h"
 
 UCLASS()
@@ -24,6 +25,12 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	
+	UPROPERTY(BlueprintReadWrite, Category = "Save")
+	UChunkSaveGame* SaveGameObject;
+	bool CheckIfChunkDataExist(FVector2d ChunkPosition);
+	FChunkStruct GetChunkData(FVector2d ChunkPosition);
+	void SaveGame(FChunkStruct Data, FVector2d ChunkPosition);
 
 	UPROPERTY(EditDefaultsOnly, Category = "NeightBoorChunk")
 	TArray<FVector2D> NeightBoorChunk;
