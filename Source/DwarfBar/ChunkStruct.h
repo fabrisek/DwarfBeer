@@ -13,8 +13,8 @@ struct FChunkStruct
 {
 	GENERATED_BODY();
 public:
-	UPROPERTY(EditDefaultsOnly, Category = "Grid")
+	UPROPERTY(EditAnywhere)
 	FVector2D ChunkPosition;
-	UPROPERTY(EditDefaultsOnly, Category = "Grid")
+	UPROPERTY(EditAnywhere)
 	TArray<FTile> TilesArray;
 };

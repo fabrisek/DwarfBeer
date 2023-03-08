@@ -37,7 +37,7 @@ private:
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Grid")
 	FChunkStruct ChunkData;
-	void GenerateChunk(FChunkStruct Data);
+	void GenerateChunk(FChunkStruct Data, bool bDataExist);
 	UProceduralMeshComponent* MeshComp;
 
 public:

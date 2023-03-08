@@ -32,7 +32,7 @@ public:
 	bool CheckIfChunkDataExist(FVector2d ChunkPosition);
 	FChunkStruct GetChunkData(FVector2d ChunkPosition);
 	void SaveGame(FChunkStruct Data, FVector2d ChunkPosition);
-
+	TArray<FVector2D>GetAllTilePositions( FVector2D ReferenceTilePosition, int BuildingWidth, int BuildingHeight, int Rotation);
 	UPROPERTY(EditDefaultsOnly, Category = "NeightBoorChunk")
 	TArray<FVector2D> NeightBoorChunk;
 	UPROPERTY(EditDefaultsOnly, Category = "NeightBoorChunk")
@@ -41,7 +41,7 @@ public:
 	TMap<FVector2D, AChunk*> ChargedChunk;
 
 	void ChangeTileData(FTile TileData, FVector2d MouseTilePosition);
-	bool CheckIfTileIsEmpty(FVector2d TilePosition);
+	bool CheckIfTileIsEmpty(FVector2d TilePosition, int BuildWidth,int BuildHeight, int Rotation);
 	AChunk* GetChunkReference(FVector2d MouseTilePosition);
 
 	

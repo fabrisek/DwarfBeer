@@ -19,4 +19,6 @@ class DWARFBAR_API UPDA_Object : public UPrimaryDataAsset
 		UStaticMesh* MeshComponent;
 	UPROPERTY(EditDefaultsOnly, Category = "IDENTIFIANT")
 		int IdItem;
+	UPROPERTY(EditDefaultsOnly, Category = "MATERIAL")
+	UMaterialInterface* Material;
 };

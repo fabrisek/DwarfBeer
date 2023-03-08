@@ -25,6 +25,55 @@ void AChunkManager::Tick(float DeltaTime)
 	ManageChunkLoading();
 }
 
+TArray<FVector2D> AChunkManager::GetAllTilePositions( FVector2D ReferenceTilePosition, int BuildingWidth, int BuildingHeight, int Rotation)
+{
+	TArray<FVector2D> AllTilePositions;
+
+	// Coordonnées des positions adjacentes par rapport à la position de référence
+	FVector2D UpOffset(0, -1);
+	FVector2D RightOffset(1, 0);
+	FVector2D DownOffset(0, 1);
+	FVector2D LeftOffset(-1, 0);
+
+	// Applique la rotation aux positions adjacentes en fonction de la valeur de Rotation
+	switch (Rotation)
+	{
+	case 1: // 90 degrés dans le sens horaire
+		UpOffset = FVector2D(-UpOffset.Y, UpOffset.X);
+		RightOffset = FVector2D(-RightOffset.Y, RightOffset.X);
+		DownOffset = FVector2D(-DownOffset.Y, DownOffset.X);
+		LeftOffset = FVector2D(-LeftOffset.Y, LeftOffset.X);
+		break;
+	case 2: // 180 degrés
+		UpOffset *= -1;
+		RightOffset *= -1;
+		DownOffset *= -1;
+		LeftOffset *= -1;
+		break;
+	case 3: // 90 degrés dans le sens antihoraire
+		UpOffset = FVector2D(UpOffset.Y, -UpOffset.X);
+		RightOffset = FVector2D(RightOffset.Y, -RightOffset.X);
+		DownOffset = FVector2D(DownOffset.Y, -DownOffset.X);
+		LeftOffset = FVector2D(LeftOffset.Y, -LeftOffset.X);
+		break;
+	default: // Rotation de 0 degrés, ne fait rien
+		break;
+	}
+
+	// Boucle sur toutes les lignes et toutes les colonnes de tiles pour calculer les positions
+	for (int i = 0; i < BuildingHeight; ++i)
+	{
+		for (int j = 0; j < BuildingWidth; ++j)
+		{
+			// Calcule la position de la tile à partir de la position de référence et des offsets
+			const FVector2D TilePosition = ReferenceTilePosition + UpOffset * i + RightOffset * j;
+			AllTilePositions.Add(TilePosition);
+		}
+	}
+
+	return AllTilePositions;
+}
+
 FTile AChunkManager::GetTileAtPosition( FVector2d MousePosition)
 {
 	// Calcul des coordonnées du chunk correspondant à la position de la souris
@@ -71,9 +120,15 @@ void AChunkManager::ChangeTileData(FTile TileData, FVector2d MouseTilePosition)
 	}
 }
 
-bool AChunkManager::CheckIfTileIsEmpty(FVector2d MouseTilePosition)
+bool AChunkManager::CheckIfTileIsEmpty(FVector2d MouseTilePosition, int BuildWidth,int BuildHeight, int Rotation)
 {
-		return GetTileAtPosition(MouseTilePosition).bIsEmpty;
+	TArray<FVector2D> AllTile = GetAllTilePositions(MouseTilePosition, BuildWidth,BuildHeight,Rotation);
+	for (int i = 0; i< AllTile.Num(); i++)
+	{
+		if (!GetTileAtPosition(AllTile[i]).bIsEmpty)
+			return false;
+	}
+	return true;
 }
 
 AChunk* AChunkManager::GetChunkReference(FVector2d MouseTilePosition)
@@ -124,12 +179,12 @@ void AChunkManager::GenerateChunk(FVector2D ChunkPosition)
 
 	if (CheckIfChunkDataExist(ChunkPosition))
 	{
-		Chunk->GenerateChunk(GetChunkData(ChunkPosition));
+		Chunk->GenerateChunk(GetChunkData(ChunkPosition),true);
 		UE_LOG(LogTemp, Warning, TEXT("DATA EXISTE: "));
 	}
 	else
 	{
-		Chunk->GenerateChunk(GetChunkData(ChunkPosition));
+		Chunk->GenerateChunk(GetChunkData(ChunkPosition),false);
 		UE_LOG(LogTemp, Warning, TEXT("DATA PAS EXIST: "));
 	}
 }

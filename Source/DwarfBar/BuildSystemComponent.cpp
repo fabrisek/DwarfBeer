@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "BuildSystemComponent.h"
+#include "DwarfBarPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
@@ -33,25 +33,63 @@ void UBuildSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	{
 		ConstructionObjectInHand->SetActorLocation(FVector(DwarfController->MousePosition.X*100, DwarfController->MousePosition.Y*100, 100));
 		ConstructionObjectInHand->SetActorRotation(FRotator(0,0,0));
+
+
+		//Change le material si la tile est valide
+		if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), 2,2,ActualRotation))
+		{
+			ConstructionObjectInHand->MeshComp->SetMaterial(0,CanConstructMaterial );
+		}
+			else
+			{
+				ConstructionObjectInHand->MeshComp->SetMaterial(0, CantConstructMaterial);
+			}
 	}
 	// ...
 }
 
+
 void UBuildSystemComponent::FinishConstruction()
 {
-	if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y)))
+	if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), 2,2,ActualRotation))
 	{
+		TArray<FVector2D> AllPosition = ChunkManager->GetAllTilePositions(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), 2,2,ActualRotation);
 		ConstructionObjectInHand->SetActorEnableCollision(true);
 		bIsOnConstruction = false;
-		ConstructionObjectInHand = nullptr;
-		FTile TileData = ChunkManager->GetTileAtPosition((FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y)));
+		ConstructionObjectInHand->MeshComp->SetMaterial(0, DataObjectInHand->Material);
+		for(int i = 0; i <AllPosition.Num(); i++)
+		{
+			
+		FTile TileData = ChunkManager->GetTileAtPosition(FVector2D(AllPosition[i].X,AllPosition[i].Y));
 		TileData.bIsEmpty = false;
-		
-		ChunkManager->ChangeTileData(TileData, FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y));	
+		TileData.ObjectReference = ConstructionObjectInHand;
+		TileData.DataObject = DataObjectInHand;
+			TileData.AllTileBatiment = AllPosition;
+		ChunkManager->ChangeTileData(TileData, FVector2D(AllPosition[i].X,AllPosition[i].Y));
+			
+		}
+		DataObjectInHand = nullptr;
+		ConstructionObjectInHand = nullptr;
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Iferis : %d"), DwarfController->MousePosition.Y);
+		UE_LOG(LogTemp, Warning, TEXT("Position non valide : %d"), DwarfController->MousePosition.Y);
+	}
+}
+
+void UBuildSystemComponent::ChangeRotation(bool bReverse)
+{
+	if (bReverse)
+	{
+		ActualRotation--;
+		if(ActualRotation < 0)
+			ActualRotation =3;
+	}
+	else
+	{
+		ActualRotation++;
+		if(ActualRotation > 3)
+			ActualRotation = 0;
 	}
 }
 
@@ -62,6 +100,7 @@ void UBuildSystemComponent::StartConstruction(UPDA_Object* DataObjectRef)
 		ConstructionObjectInHand = GetWorld()->SpawnActor<ADefaultObject>(ADefaultObject::StaticClass(), DwarfController->MousePosition*100 , FRotator());
 		ConstructionObjectInHand->MeshComp->SetStaticMesh(DataObjectRef->MeshComponent);
 		ConstructionObjectInHand->SetActorEnableCollision(false);
+		DataObjectInHand = DataObjectRef;
 		bIsOnConstruction = true;
 	}
 }

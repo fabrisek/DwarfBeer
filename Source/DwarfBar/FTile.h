@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DefaultObject.h"
+#include "PDA_Object.h"
 #include "FTile.generated.h"
 
 USTRUCT(BlueprintType)
@@ -17,12 +19,18 @@ public:
 	: IndexMeshInstance(0), IdData(0), TilePosition(FVector2D::ZeroVector)
 	{
 	}
-	UPROPERTY(EditDefaultsOnly, Category = "Mesh")
+	UPROPERTY(EditAnywhere, Category = "Mesh")
 	int IndexMeshInstance;
-	UPROPERTY(EditDefaultsOnly, Category = "Data")
+	UPROPERTY(EditAnywhere, Category = "Data")
 	int IdData;
-	UPROPERTY(EditDefaultsOnly, Category = "Position")
+	UPROPERTY(EditAnywhere, Category = "Position")
 	FVector2D TilePosition;
-	UPROPERTY(EditDefaultsOnly, Category = "Position")
+	UPROPERTY(EditAnywhere, Category = "Position")
 	bool bIsEmpty;
+	UPROPERTY(EditAnywhere, Category = "Position")
+	ADefaultObject* ObjectReference;
+	UPROPERTY(EditAnywhere, Category = "Position")
+	UPDA_Object* DataObject;
+	UPROPERTY(EditAnywhere, Category = "Position")
+	TArray<FVector2D> AllTileBatiment;
 };

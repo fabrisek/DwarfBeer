@@ -31,7 +31,7 @@ void AChunk::Tick(float DeltaTime)
 }
 
 //Genere le mesh du Chunk
-void AChunk::GenerateChunk(FChunkStruct Data)
+void AChunk::GenerateChunk(FChunkStruct Data, bool bDataExist)
 {
 	TArray<FVector> MeshPositions;
 	TArray<FVector> MeshNormals;
@@ -79,15 +79,17 @@ void AChunk::GenerateChunk(FChunkStruct Data)
 			MeshIndices.Add(LowerRightIndex);
 
 
-
-			// Creation des DATA.
-			FVector2D TilePosition;
-			TilePosition.X = FMath::Floor(GetActorLocation().X + X * DistanceCube);
-			TilePosition.Y = FMath::Floor(GetActorLocation().Y + Y * DistanceCube);
-			FTile TiLes;
-			TiLes.TilePosition = TilePosition;
-			TiLes.bIsEmpty = true;
-			ChunkData.TilesArray.Add(TiLes);
+			if (!bDataExist)
+			{
+				// Creation des DATA.
+				FVector2D TilePosition;
+				TilePosition.X = FMath::Floor(GetActorLocation().X + X * DistanceCube);
+				TilePosition.Y = FMath::Floor(GetActorLocation().Y + Y * DistanceCube);
+				FTile TiLes;
+				TiLes.TilePosition = TilePosition;
+				TiLes.bIsEmpty = true;
+				ChunkData.TilesArray.Add(TiLes);
+			}
 		}
 	}
 
