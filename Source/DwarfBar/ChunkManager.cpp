@@ -16,7 +16,6 @@ AChunkManager::AChunkManager()
 void AChunkManager::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -25,6 +24,64 @@ void AChunkManager::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	ManageChunkLoading();
 }
+
+FTile AChunkManager::GetTileAtPosition( FVector2d MousePosition)
+{
+	// Calcul des coordonnées du chunk correspondant à la position de la souris
+	FVector2d ChunkPosition;
+	ChunkPosition.X = FMath::FloorToInt(MousePosition.X / 16);
+	ChunkPosition.Y = FMath::FloorToInt(MousePosition.Y / 16);
+
+	// Récupération de la référence vers le chunk correspondant
+	const AChunk* ChunkRef = ChargedChunk[ChunkPosition];
+
+	// Calcul de l'index de la tuile correspondant à la position de la souris dans le tableau de tuiles du chunk
+	const int TileX = FMath::FloorToInt(MousePosition.X) - (ChunkPosition.X * 16);
+	const int TileY = FMath::FloorToInt(MousePosition.Y) - (ChunkPosition.Y * 16);
+	const int TileIndex = TileX + (TileY * 16);
+
+	// Vérification si l'index est valide
+	if (TileIndex >= 0 && TileIndex < 256)
+	{
+		return ChargedChunk[ChunkPosition]->ChunkData.TilesArray[TileIndex];
+	}
+	FTile tile;
+	return tile;
+}
+
+void AChunkManager::ChangeTileData(FTile TileData, FVector2d MouseTilePosition)
+{
+	// Calcul des coordonnées du chunk correspondant à la position de la souris
+	FVector2d ChunkPosition;
+	ChunkPosition.X = FMath::FloorToInt(MouseTilePosition.X / 16);
+	ChunkPosition.Y = FMath::FloorToInt(MouseTilePosition.Y / 16);
+
+	// Récupération de la référence vers le chunk correspondant
+	const AChunk* ChunkRef = ChargedChunk[ChunkPosition];
+
+	// Calcul de l'index de la tuile correspondant à la position de la souris dans le tableau de tuiles du chunk
+	const int TileX = FMath::FloorToInt(MouseTilePosition.X) - (ChunkPosition.X * 16);
+	const int TileY = FMath::FloorToInt(MouseTilePosition.Y) - (ChunkPosition.Y * 16);
+	const int TileIndex = TileX + (TileY * 16);
+
+	// Vérification si l'index est valide
+	if (TileIndex >= 0 && TileIndex < 256)
+	{
+		ChargedChunk[ChunkPosition]->ChunkData.TilesArray[TileIndex] = TileData;
+	}
+}
+
+bool AChunkManager::CheckIfTileIsEmpty(FVector2d MouseTilePosition)
+{
+		return GetTileAtPosition(MouseTilePosition).bIsEmpty;
+}
+
+AChunk* AChunkManager::GetChunkReference(FVector2d MouseTilePosition)
+{
+	const FVector2d ChunkPosition = MouseTilePosition / 16;
+	return ChargedChunk[ChunkPosition];
+}
+
 
 FVector2D AChunkManager::GetPlayerChunkPosition()
 {

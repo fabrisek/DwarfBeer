@@ -23,4 +23,6 @@ public:
 	int IdData;
 	UPROPERTY(EditDefaultsOnly, Category = "Position")
 	FVector2D TilePosition;
+	UPROPERTY(EditDefaultsOnly, Category = "Position")
+	bool bIsEmpty;
 };

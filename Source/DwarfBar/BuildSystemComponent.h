@@ -3,7 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ChunkManager.h"
 #include "PDA_Object.h"
+#include "DefaultObject.h"
+#include "DwarfBarPlayerController.h"
 #include "Components/ActorComponent.h"
 #include "BuildSystemComponent.generated.h"
 
@@ -17,6 +20,7 @@ public:
 	// Sets default values for this component's properties
 	UBuildSystemComponent();
 
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -24,9 +28,20 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-	void StartConstruction(UPDA_Object DataObjectRef);
-
+	UFUNCTION(BlueprintCallable, Category = "Construction")
 	void FinishConstruction();
-		
+	
+	UFUNCTION(BlueprintCallable, Category = "Construction")
+	void StartConstruction(UPARAM(DisplayName="DATA Object Ref") UPDA_Object* DataObjectRef);
+	UPROPERTY(EditDefaultsOnly, Category = "REFERENCE")
+	bool bIsOnConstruction;
+	
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "REFERENCE")
+	ADwarfBarPlayerController* DwarfController;
+	UPROPERTY(EditDefaultsOnly, Category = "REFERENCE")
+	ADefaultObject* ConstructionObjectInHand;
+	UPROPERTY(EditDefaultsOnly, Category = "REFERENCE")
+	AChunkManager* ChunkManager;
 };

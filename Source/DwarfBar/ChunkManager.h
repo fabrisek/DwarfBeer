@@ -25,7 +25,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
+	FTile GetTileAtPosition(FVector2d MousePosition);
+
 	UPROPERTY(BlueprintReadWrite, Category = "Save")
 	UChunkSaveGame* SaveGameObject;
 	bool CheckIfChunkDataExist(FVector2d ChunkPosition);
@@ -38,6 +39,12 @@ public:
 	int RangeNeedToBeLoad;
 	UPROPERTY(EditDefaultsOnly, Category = "DATA to Instance")
 	TMap<FVector2D, AChunk*> ChargedChunk;
+
+	void ChangeTileData(FTile TileData, FVector2d MouseTilePosition);
+	bool CheckIfTileIsEmpty(FVector2d TilePosition);
+	AChunk* GetChunkReference(FVector2d MouseTilePosition);
+
+	
 private:
 	FVector2D GetPlayerChunkPosition();
 	TArray<FVector2D>GetNeightBoorChunk();

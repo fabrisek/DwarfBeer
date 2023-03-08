@@ -86,6 +86,7 @@ void AChunk::GenerateChunk(FChunkStruct Data)
 			TilePosition.Y = FMath::Floor(GetActorLocation().Y + Y * DistanceCube);
 			FTile TiLes;
 			TiLes.TilePosition = TilePosition;
+			TiLes.bIsEmpty = true;
 			ChunkData.TilesArray.Add(TiLes);
 		}
 	}
