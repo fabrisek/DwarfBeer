@@ -21,14 +21,13 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	FTile GetTileAtPosition(FVector2d MousePosition);
-
-	UPROPERTY(BlueprintReadWrite, Category = "Save")
-	UChunkSaveGame* SaveGameObject;
+	
 	bool CheckIfChunkDataExist(FVector2d ChunkPosition);
 	FChunkStruct GetChunkData(FVector2d ChunkPosition);
 	void SaveGame(FChunkStruct Data, FVector2d ChunkPosition);

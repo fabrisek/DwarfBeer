@@ -5,6 +5,8 @@
 #include <Microsoft/COMPointer.h>
 
 #include "ChunkManager.h"
+#include "Engine/DataTable.h"
+#include "Structure/FObjectDataTable.h"
 
 
 // Sets default values
@@ -39,12 +41,13 @@ void AChunk::GenerateChunk(FChunkStruct Data, bool bDataExist)
 
 	//Pour les DATA du Chunk
 	ChunkData = Data;
-	
+	int Index = 0;
 	// Boucle pour parcourir les carrés du chunk
 	for (int32 X = 0; X < SizeChunk; X++)
 	{
 		for (int32 Y = 0; Y < SizeChunk; Y++)
 		{
+			Index++;
 			// Calcul des positions des sommets pour chaque carré
 			FVector UpperLeftCorner = FVector(X * DistanceCube, Y * DistanceCube, 0.0f);
 			FVector LowerRightCorner = FVector((X + 1) * DistanceCube, (Y + 1) * DistanceCube, 0.0f);
@@ -78,17 +81,58 @@ void AChunk::GenerateChunk(FChunkStruct Data, bool bDataExist)
 			MeshIndices.Add(UpperRightIndex);
 			MeshIndices.Add(LowerRightIndex);
 
-
+			FVector2D TilePosition;
+			
+			TilePosition.X = (ChunkData.ChunkPosition.X * 16) + Y;
+			TilePosition.Y = (ChunkData.ChunkPosition.Y * 16) + X;
 			if (!bDataExist)
 			{
 				// Creation des DATA.
-				FVector2D TilePosition;
-				TilePosition.X = FMath::Floor(GetActorLocation().X + X * DistanceCube);
-				TilePosition.Y = FMath::Floor(GetActorLocation().Y + Y * DistanceCube);
+
 				FTile TiLes;
 				TiLes.TilePosition = TilePosition;
 				TiLes.bIsEmpty = true;
 				ChunkData.TilesArray.Add(TiLes);
+			}
+			else
+			{
+				if (ChunkData.TilesArray[Index-1].AllTileBatiment.Num() > 0)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Valeur position dans le dans chunk : X = %f, Y = %f"), TilePosition.X, TilePosition.Y);
+					UE_LOG(LogTemp, Warning, TEXT("Valeur position dans le dans ARRAY : X = %f, Y = %f"), ChunkData.TilesArray[Index-1].AllTileBatiment[0].X, ChunkData.TilesArray[Index-1].AllTileBatiment[0].Y);
+					UE_LOG(LogTemp, Warning, TEXT("Valeur de diu nombre de case prise : %d"), ChunkData.TilesArray[Index-1].AllTileBatiment.Num());
+
+				}
+				if (!ChunkData.TilesArray[Index -1].bIsEmpty && ChunkData.TilesArray[Index-1].AllTileBatiment[0] == TilePosition)
+				{
+					FString DataTablePath = "/Game/DataObject.DataObject";
+					UObject* DataTableObject = StaticLoadObject(UDataTable::StaticClass(), nullptr, *DataTablePath);
+					
+					if (!DataTableObject)
+					{
+						UE_LOG(LogTemp, Error, TEXT("DataTable not found"));
+						return;
+					}
+
+					// Vérifie que l'objet chargé est bien un DataTable
+					if (UDataTable* DataTable = Cast<UDataTable>(DataTableObject))
+					{
+						FObjectDataTable* Row = DataTable->FindRow<FObjectDataTable>(TEXT("Cube"), TEXT("Cube"));
+
+						if (!Row)
+						{
+							UE_LOG(LogTemp, Error, TEXT("Row not found"));
+							return;
+						}
+
+						ADefaultObject* ConstructionObjectInHand = GetWorld()->SpawnActor<ADefaultObject>(ADefaultObject::StaticClass(), FVector3d(TilePosition.X * DistanceCube,TilePosition.Y * DistanceCube,100) , FRotator());
+						ConstructionObjectInHand->MeshComp->SetStaticMesh(Row->DataObjectRef->MeshComponent);
+						ConstructionObjectInHand->SetActorEnableCollision(true);
+					}
+
+					
+					//ChunkData.TilesArray[Index].IdData = 
+				}	
 			}
 		}
 	}

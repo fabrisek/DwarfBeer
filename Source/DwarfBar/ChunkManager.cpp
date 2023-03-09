@@ -25,54 +25,61 @@ void AChunkManager::Tick(float DeltaTime)
 	ManageChunkLoading();
 }
 
-TArray<FVector2D> AChunkManager::GetAllTilePositions( FVector2D ReferenceTilePosition, int BuildingWidth, int BuildingHeight, int Rotation)
+TArray<FVector2D> AChunkManager::GetAllTilePositions(FVector2D ReferenceTilePosition, int BuildingWidth, int BuildingHeight, int Rotation)
 {
-	TArray<FVector2D> AllTilePositions;
+    TArray<FVector2D> AllTilePositions;
 
-	// Coordonnées des positions adjacentes par rapport à la position de référence
-	FVector2D UpOffset(0, -1);
-	FVector2D RightOffset(1, 0);
-	FVector2D DownOffset(0, 1);
-	FVector2D LeftOffset(-1, 0);
+    // Coordonnées des positions adjacentes par rapport à la position de référence
+    FVector2D UpOffset(0, -1);
+    FVector2D RightOffset(1, 0);
+    FVector2D DownOffset(0, 1);
+    FVector2D LeftOffset(-1, 0);
 
-	// Applique la rotation aux positions adjacentes en fonction de la valeur de Rotation
-	switch (Rotation)
-	{
-	case 1: // 90 degrés dans le sens horaire
-		UpOffset = FVector2D(-UpOffset.Y, UpOffset.X);
-		RightOffset = FVector2D(-RightOffset.Y, RightOffset.X);
-		DownOffset = FVector2D(-DownOffset.Y, DownOffset.X);
-		LeftOffset = FVector2D(-LeftOffset.Y, LeftOffset.X);
-		break;
-	case 2: // 180 degrés
-		UpOffset *= -1;
-		RightOffset *= -1;
-		DownOffset *= -1;
-		LeftOffset *= -1;
-		break;
-	case 3: // 90 degrés dans le sens antihoraire
-		UpOffset = FVector2D(UpOffset.Y, -UpOffset.X);
-		RightOffset = FVector2D(RightOffset.Y, -RightOffset.X);
-		DownOffset = FVector2D(DownOffset.Y, -DownOffset.X);
-		LeftOffset = FVector2D(LeftOffset.Y, -LeftOffset.X);
-		break;
-	default: // Rotation de 0 degrés, ne fait rien
-		break;
-	}
+    // Applique la rotation aux positions adjacentes en fonction de la valeur de Rotation
+    switch (Rotation)
+    {
+    case 1: // 90 degrés dans le sens horaire
+        UpOffset = FVector2D(-UpOffset.Y, UpOffset.X);
+        RightOffset = FVector2D(-RightOffset.Y, RightOffset.X);
+        DownOffset = FVector2D(-DownOffset.Y, DownOffset.X);
+        LeftOffset = FVector2D(-LeftOffset.Y, LeftOffset.X);
+        break;
+    case 2: // 180 degrés
+        UpOffset *= -1;
+        RightOffset *= -1;
+        DownOffset *= -1;
+        LeftOffset *= -1;
+        break;
+    case 3: // 90 degrés dans le sens antihoraire
+        UpOffset = FVector2D(UpOffset.Y, -UpOffset.X);
+        RightOffset = FVector2D(RightOffset.Y, -RightOffset.X);
+        DownOffset = FVector2D(DownOffset.Y, -DownOffset.X);
+        LeftOffset = FVector2D(LeftOffset.Y, -LeftOffset.X);
+        break;
+    default: // Rotation de 0 degrés, ne fait rien
+        break;
+    }
 
-	// Boucle sur toutes les lignes et toutes les colonnes de tiles pour calculer les positions
-	for (int i = 0; i < BuildingHeight; ++i)
-	{
-		for (int j = 0; j < BuildingWidth; ++j)
-		{
-			// Calcule la position de la tile à partir de la position de référence et des offsets
-			const FVector2D TilePosition = ReferenceTilePosition + UpOffset * i + RightOffset * j;
-			AllTilePositions.Add(TilePosition);
-		}
-	}
+    // Ajoute la position de référence à la liste des positions
+    AllTilePositions.Add(ReferenceTilePosition);
 
-	return AllTilePositions;
+    // Boucle sur toutes les lignes et toutes les colonnes de tiles pour calculer les positions
+    for (int i = 0; i < BuildingHeight; ++i)
+    {
+        for (int j = 0; j < BuildingWidth; ++j)
+        {
+            if (i == 0 && j == 0) continue; // évite de rajouter la position de référence une seconde fois
+
+            // Calcule la position de la tile à partir de la position de référence et des offsets
+            const FVector2D TilePosition = ReferenceTilePosition + UpOffset * i + RightOffset * j;
+            AllTilePositions.Add(TilePosition);
+        }
+    }
+
+    return AllTilePositions;
 }
+
+
 
 FTile AChunkManager::GetTileAtPosition( FVector2d MousePosition)
 {
@@ -234,12 +241,12 @@ void AChunkManager::ManageChunkLoading()
 			}
 	}
 }
-
+// Verifie si la Save existe sinon la creer.
 bool AChunkManager::CheckIfChunkDataExist(FVector2d ChunkPosition)
 {
 	const FString ChunkSaveName = ChunkPosition.ToString();
 	USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(ChunkSaveName, 0);
-	SaveGameObject = Cast<UChunkSaveGame>(LoadedGame);
+	UChunkSaveGame* SaveGameObject = Cast<UChunkSaveGame>(LoadedGame);
 	if (!SaveGameObject)
 	{
 		SaveGameObject = Cast<UChunkSaveGame>(UGameplayStatics::CreateSaveGameObject(UChunkSaveGame::StaticClass()));
@@ -247,24 +254,45 @@ bool AChunkManager::CheckIfChunkDataExist(FVector2d ChunkPosition)
 		UGameplayStatics::SaveGameToSlot(SaveGameObject, ChunkSaveName, 0);
 		return false;
 	}
-		return true;
+	return true;
 }
 
 FChunkStruct AChunkManager::GetChunkData(FVector2d ChunkPosition)
 {
 	const FString ChunkSaveName = ChunkPosition.ToString();
 	USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(ChunkSaveName, 0);
-	SaveGameObject = Cast<UChunkSaveGame>(LoadedGame);
-
+	UChunkSaveGame* SaveGameObject = Cast<UChunkSaveGame>(LoadedGame);
+	UE_LOG(LogTemp, Warning, TEXT("Valeur de la save : %d"), SaveGameObject->ChunkData.TilesArray.Num());
+	UE_LOG(LogTemp, Warning, TEXT("Valeur du ChunkPosition : X = %f, Y = %f"), SaveGameObject->ChunkData.ChunkPosition.X, SaveGameObject->ChunkData.ChunkPosition.Y);
 	return SaveGameObject->ChunkData;
 }
 
 void AChunkManager::SaveGame(FChunkStruct Data, FVector2d ChunkPosition)
 {
+	if (Data.TilesArray.Num() > 0)
+	{
+		
+	UE_LOG(LogTemp, Warning, TEXT("Valeur de l'en sauvegarde : %d"), Data.TilesArray.Num());
 	const FString ChunkSaveName = ChunkPosition.ToString();
 	USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(ChunkSaveName, 0);
-	SaveGameObject = Cast<UChunkSaveGame>(LoadedGame);
+	UChunkSaveGame* SaveGameObject = Cast<UChunkSaveGame>(LoadedGame);
 	SaveGameObject->ChunkData = Data;
 	
 	UGameplayStatics::SaveGameToSlot(SaveGameObject, ChunkSaveName, 0);
+	}
+}
+
+void AChunkManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	for(int i = 0 ; i < AllPositionChunkLoad.Num(); i++)
+	{
+		AChunk** Chunk = ChargedChunk.Find(AllPositionChunkLoad[i]);
+		if (Chunk != nullptr)
+			if ((*Chunk) != nullptr)
+			{
+				SaveGame((*Chunk)->ChunkData, AllPositionChunkLoad[i]);
+			}		
+	}
 }

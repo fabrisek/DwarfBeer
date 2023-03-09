@@ -36,7 +36,7 @@ void UBuildSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 
 		//Change le material si la tile est valide
-		if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), 2,2,ActualRotation))
+		if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), 1,1,ActualRotation))
 		{
 			ConstructionObjectInHand->MeshComp->SetMaterial(0,CanConstructMaterial );
 		}
@@ -51,22 +51,22 @@ void UBuildSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 void UBuildSystemComponent::FinishConstruction()
 {
-	if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), 2,2,ActualRotation))
+	if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), 1,1,ActualRotation))
 	{
-		TArray<FVector2D> AllPosition = ChunkManager->GetAllTilePositions(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), 2,2,ActualRotation);
+		TArray<FVector2D> AllPosition = ChunkManager->GetAllTilePositions(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), 1,1,ActualRotation);
 		ConstructionObjectInHand->SetActorEnableCollision(true);
 		bIsOnConstruction = false;
 		ConstructionObjectInHand->MeshComp->SetMaterial(0, DataObjectInHand->Material);
-		for(int i = 0; i <AllPosition.Num(); i++)
+		for(int i = 0; i < AllPosition.Num(); i++)
 		{
 			
-		FTile TileData = ChunkManager->GetTileAtPosition(FVector2D(AllPosition[i].X,AllPosition[i].Y));
-		TileData.bIsEmpty = false;
-		TileData.ObjectReference = ConstructionObjectInHand;
-		TileData.DataObject = DataObjectInHand;
+			FTile TileData = ChunkManager->GetTileAtPosition(FVector2D(AllPosition[i].X,AllPosition[i].Y));
+			TileData.bIsEmpty = false;
 			TileData.AllTileBatiment = AllPosition;
-		ChunkManager->ChangeTileData(TileData, FVector2D(AllPosition[i].X,AllPosition[i].Y));
-			
+			TileData.IdData = DataObjectInHand->IdItem;
+			ChunkManager->ChangeTileData(TileData, FVector2D(AllPosition[i].X,AllPosition[i].Y));
+			//TileData.ObjectReference = ConstructionObjectInHand;
+			//TileData.DataObject = DataObjectInHand;
 		}
 		DataObjectInHand = nullptr;
 		ConstructionObjectInHand = nullptr;

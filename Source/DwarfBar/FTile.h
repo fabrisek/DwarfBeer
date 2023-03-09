@@ -11,14 +11,17 @@
 USTRUCT(BlueprintType)
 struct FTile
 {
-	GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
 
 public:
 	// Sets default values for this actor's properties
 	FTile()
-	: IndexMeshInstance(0), IdData(0), TilePosition(FVector2D::ZeroVector)
 	{
+		IndexMeshInstance = 0;
+		IdData = 0;
+		bIsEmpty = true;
 	}
+
 	UPROPERTY(EditAnywhere, Category = "Mesh")
 	int IndexMeshInstance;
 	UPROPERTY(EditAnywhere, Category = "Data")
@@ -27,10 +30,20 @@ public:
 	FVector2D TilePosition;
 	UPROPERTY(EditAnywhere, Category = "Position")
 	bool bIsEmpty;
-	UPROPERTY(EditAnywhere, Category = "Position")
-	ADefaultObject* ObjectReference;
-	UPROPERTY(EditAnywhere, Category = "Position")
-	UPDA_Object* DataObject;
+	//ADefaultObject* ObjectReference;
+	//UPDA_Object* DataObject;
 	UPROPERTY(EditAnywhere, Category = "Position")
 	TArray<FVector2D> AllTileBatiment;
+
+	// Serialize the structure
+	friend FArchive& operator<<(FArchive& Archive, FTile& Tile)
+	{
+		Archive << Tile.IndexMeshInstance;
+		Archive << Tile.IdData;
+		Archive << Tile.bIsEmpty;
+		Archive << Tile.AllTileBatiment;
+		Archive << Tile.TilePosition;
+		
+		return Archive;
+	}
 };
