@@ -16,9 +16,11 @@ class DWARFBAR_API UPDA_Object : public UPrimaryDataAsset
 
 	public:
 	UPROPERTY(EditDefaultsOnly, Category = "Mesh")
-		UStaticMesh* MeshComponent;
+	UStaticMesh* MeshComponent;
 	UPROPERTY(EditDefaultsOnly, Category = "IDENTIFIANT")
-		int IdItem;
+	FString IdDataRow;
 	UPROPERTY(EditDefaultsOnly, Category = "MATERIAL")
 	UMaterialInterface* Material;
+	UPROPERTY(EditDefaultsOnly, Category = "SIZEGRID")
+	FVector2D SizeGrid;
 };

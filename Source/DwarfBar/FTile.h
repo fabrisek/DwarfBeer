@@ -17,15 +17,12 @@ public:
 	// Sets default values for this actor's properties
 	FTile()
 	{
-		IndexMeshInstance = 0;
-		IdData = 0;
+		IdDataRow = "Cube";
 		bIsEmpty = true;
 	}
-
-	UPROPERTY(EditAnywhere, Category = "Mesh")
-	int IndexMeshInstance;
+	
 	UPROPERTY(EditAnywhere, Category = "Data")
-	int IdData;
+	FString IdDataRow;
 	UPROPERTY(EditAnywhere, Category = "Position")
 	FVector2D TilePosition;
 	UPROPERTY(EditAnywhere, Category = "Position")
@@ -38,8 +35,7 @@ public:
 	// Serialize the structure
 	friend FArchive& operator<<(FArchive& Archive, FTile& Tile)
 	{
-		Archive << Tile.IndexMeshInstance;
-		Archive << Tile.IdData;
+		Archive << Tile.IdDataRow;
 		Archive << Tile.bIsEmpty;
 		Archive << Tile.AllTileBatiment;
 		Archive << Tile.TilePosition;

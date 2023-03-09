@@ -36,7 +36,7 @@ void UBuildSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 
 		//Change le material si la tile est valide
-		if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), 1,1,ActualRotation))
+		if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), DataObjectInHand->SizeGrid.X,DataObjectInHand->SizeGrid.Y,ActualRotation))
 		{
 			ConstructionObjectInHand->MeshComp->SetMaterial(0,CanConstructMaterial );
 		}
@@ -51,9 +51,9 @@ void UBuildSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 void UBuildSystemComponent::FinishConstruction()
 {
-	if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), 1,1,ActualRotation))
+	if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), DataObjectInHand->SizeGrid.X,DataObjectInHand->SizeGrid.Y,ActualRotation))
 	{
-		TArray<FVector2D> AllPosition = ChunkManager->GetAllTilePositions(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), 1,1,ActualRotation);
+		TArray<FVector2D> AllPosition = ChunkManager->GetAllTilePositions(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), DataObjectInHand->SizeGrid.X,DataObjectInHand->SizeGrid.Y,ActualRotation);
 		ConstructionObjectInHand->SetActorEnableCollision(true);
 		bIsOnConstruction = false;
 		ConstructionObjectInHand->MeshComp->SetMaterial(0, DataObjectInHand->Material);
@@ -63,7 +63,7 @@ void UBuildSystemComponent::FinishConstruction()
 			FTile TileData = ChunkManager->GetTileAtPosition(FVector2D(AllPosition[i].X,AllPosition[i].Y));
 			TileData.bIsEmpty = false;
 			TileData.AllTileBatiment = AllPosition;
-			TileData.IdData = DataObjectInHand->IdItem;
+			TileData.IdDataRow = DataObjectInHand->IdDataRow;
 			ChunkManager->ChangeTileData(TileData, FVector2D(AllPosition[i].X,AllPosition[i].Y));
 			//TileData.ObjectReference = ConstructionObjectInHand;
 			//TileData.DataObject = DataObjectInHand;

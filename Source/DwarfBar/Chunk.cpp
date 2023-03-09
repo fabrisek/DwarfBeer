@@ -22,8 +22,6 @@ AChunk::AChunk()
 void AChunk::BeginPlay()
 {
 	Super::BeginPlay();
-	InstanceManager = Cast<AMeshInstanceManager>(
-		UGameplayStatics::GetActorOfClass(GetWorld(), AMeshInstanceManager::StaticClass()));
 }
 
 // Called every frame
@@ -128,6 +126,8 @@ void AChunk::GenerateChunk(FChunkStruct Data, bool bDataExist)
 						ADefaultObject* ConstructionObjectInHand = GetWorld()->SpawnActor<ADefaultObject>(ADefaultObject::StaticClass(), FVector3d(TilePosition.X * DistanceCube,TilePosition.Y * DistanceCube,100) , FRotator());
 						ConstructionObjectInHand->MeshComp->SetStaticMesh(Row->DataObjectRef->MeshComponent);
 						ConstructionObjectInHand->SetActorEnableCollision(true);
+						ConstructionObjectInHand->MeshComp->SetMaterial(0,Row->DataObjectRef->Material);
+						MeshComp->SetMaterial(0,Row->DataObjectRef->Material);
 					}
 
 					

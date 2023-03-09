@@ -6,7 +6,6 @@
 #include "GameFramework/Actor.h"
 #include "ChunkStruct.h"
 #include <Kismet/GameplayStatics.h>
-#include "MeshInstanceManager.h"
 #include "FTile.h"
 #include "ProceduralMeshComponent.h"
 #include "Chunk.generated.h"
@@ -28,8 +27,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-	AMeshInstanceManager* InstanceManager;
-
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Chunk")
 	int SizeChunk = 16;
 	UPROPERTY(EditDefaultsOnly, Category = "Chunk")
