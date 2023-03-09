@@ -29,6 +29,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	UFUNCTION(BlueprintCallable, Category = "Construction")
 	void FinishConstruction();
+	void AddObjectInManager(FVector2D TilePosition, UPDA_Object* DataObject);
 	UFUNCTION(BlueprintCallable, Category = "Construction")
 	void ChangeRotation(bool bReverse);
 	int ActualRotation;

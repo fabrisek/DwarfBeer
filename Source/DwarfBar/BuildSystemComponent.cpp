@@ -52,6 +52,8 @@ void UBuildSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 void UBuildSystemComponent::FinishConstruction()
 {
+	if (bIsOnConstruction)
+	{
 	if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), DataObjectInHand->SizeGrid.X,DataObjectInHand->SizeGrid.Y,ActualRotation))
 	{
 		TArray<FVector2D> AllPosition = ChunkManager->GetAllTilePositions(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), DataObjectInHand->SizeGrid.X,DataObjectInHand->SizeGrid.Y,ActualRotation);
@@ -69,11 +71,7 @@ void UBuildSystemComponent::FinishConstruction()
 			
 			//TileData.ObjectReference = ConstructionObjectInHand;
 		}
-		if (DataObjectInHand->ObjectType == EObjectType::Table)
-		{
-			ARestaurantManager* RestaurantManager = Cast<ARestaurantManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ARestaurantManager::StaticClass()));
-			RestaurantManager->AddTable(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y));
-		}
+		AddObjectInManager(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y),DataObjectInHand );
 		
 		DataObjectInHand = nullptr;
 		ConstructionObjectInHand = nullptr;
@@ -81,6 +79,16 @@ void UBuildSystemComponent::FinishConstruction()
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Position non valide : %d"), DwarfController->MousePosition.Y);
+	}
+	}	
+}
+
+void UBuildSystemComponent::AddObjectInManager(FVector2D TilePosition, UPDA_Object* DataObject)
+{
+	if (DataObject->ObjectType == EObjectType::Table)
+	{
+		ARestaurantManager* RestaurantManager = Cast<ARestaurantManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ARestaurantManager::StaticClass()));
+		RestaurantManager->AddTable(TilePosition);
 	}
 }
 

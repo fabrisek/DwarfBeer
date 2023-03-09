@@ -2,15 +2,14 @@
 
 
 #include "RestaurantManager.h"
+#include "FTile.h"
 
-#include "Structure/FTableData.h"
 
 // Sets default values
 ARestaurantManager::ARestaurantManager()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 // Called when the game starts or when spawned
@@ -18,6 +17,7 @@ void ARestaurantManager::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	ChunkManager = Cast<AChunkManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AChunkManager::StaticClass()));
 }
 
 // Called every frame
@@ -31,6 +31,16 @@ void ARestaurantManager::AddTable(FVector2D TilePosition)
 {
 	FTableData Data;
 	Data.TilePosition = TilePosition;
+	TArray<FVector2D> AdjacentTile = ChunkManager->FindAdjcenteTile(TilePosition,1,1);
+	for (int i = 0; i < AdjacentTile.Num(); i++)
+	{
+		FTile Tile = ChunkManager->GetTileAtPosition(AdjacentTile[i]);
+		if (!Tile.bIsEmpty)
+		{
+			if (Tile.IdDataRow == "Chair")
+				Data.ChairPosition.Add(AdjacentTile[i]);
+		}
+	}
 	TableData.Add(TilePosition,Data);
 }
 

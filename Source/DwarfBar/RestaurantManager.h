@@ -3,8 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BuildSystemComponent.h"
 #include "GameFramework/Actor.h"
-#include "DwarfBar/Structure/FTableData.h"
+#include "Structure/FTableData.h"
 #include "RestaurantManager.generated.h"
 
 UCLASS()
@@ -27,4 +28,7 @@ public:
 	TMap<FVector2D,FTableData> TableData;
 
 	void AddTable(FVector2D TilePosition);
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Info)
+	AChunkManager* ChunkManager;
 };

@@ -144,6 +144,25 @@ AChunk* AChunkManager::GetChunkReference(FVector2d MouseTilePosition)
 	return ChargedChunk[ChunkPosition];
 }
 
+TArray<FVector2D> AChunkManager::FindAdjcenteTile(FVector2D TilePosition, int hauteurTile, int longueurTile) 
+{
+	TArray<FVector2D> casesAdjacentes;
+
+	for (int i = 1; i <= hauteurTile; i++) 
+	{
+		casesAdjacentes.Add(FVector2D(TilePosition.X + i, TilePosition.Y));    // Case à droite
+		casesAdjacentes.Add(FVector2D(TilePosition.X - i, TilePosition.Y));    // Case à gauche
+	}
+
+	for (int j = 1; j <= longueurTile; j++) 
+	{
+		casesAdjacentes.Add(FVector2D(TilePosition.X, TilePosition.Y + j));    // Case en haut
+		casesAdjacentes.Add(FVector2D(TilePosition.X, TilePosition.Y - j));    // Case en bas
+	}
+
+	return casesAdjacentes;
+}
+	
 
 FVector2D AChunkManager::GetPlayerChunkPosition()
 {

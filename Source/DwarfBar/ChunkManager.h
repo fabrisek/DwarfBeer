@@ -42,7 +42,7 @@ public:
 	void ChangeTileData(FTile TileData, FVector2d MouseTilePosition);
 	bool CheckIfTileIsEmpty(FVector2d TilePosition, int BuildWidth,int BuildHeight, int Rotation);
 	AChunk* GetChunkReference(FVector2d MouseTilePosition);
-
+	TArray<FVector2D> FindAdjcenteTile(FVector2D TilePosition, int hauteurTile, int longueurTile);
 	
 private:
 	FVector2D GetPlayerChunkPosition();
