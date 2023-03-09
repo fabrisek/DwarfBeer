@@ -115,7 +115,7 @@ void AChunk::GenerateChunk(FChunkStruct Data, bool bDataExist)
 					// Vérifie que l'objet chargé est bien un DataTable
 					if (UDataTable* DataTable = Cast<UDataTable>(DataTableObject))
 					{
-						FObjectDataTable* Row = DataTable->FindRow<FObjectDataTable>(TEXT("Cube"), TEXT("Cube"));
+						FObjectDataTable* Row = DataTable->FindRow<FObjectDataTable>(ChunkData.TilesArray[Index-1].IdDataRow , TEXT("Cube"));
 
 						if (!Row)
 						{
@@ -128,6 +128,8 @@ void AChunk::GenerateChunk(FChunkStruct Data, bool bDataExist)
 						ConstructionObjectInHand->SetActorEnableCollision(true);
 						ConstructionObjectInHand->MeshComp->SetMaterial(0,Row->DataObjectRef->Material);
 						MeshComp->SetMaterial(0,Row->DataObjectRef->Material);
+
+						
 					}
 
 					

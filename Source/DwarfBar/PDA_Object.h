@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
+#include "Enum/EObjectType.h"
 #include "PDA_Object.generated.h"
 
 /**
@@ -18,9 +19,13 @@ class DWARFBAR_API UPDA_Object : public UPrimaryDataAsset
 	UPROPERTY(EditDefaultsOnly, Category = "Mesh")
 	UStaticMesh* MeshComponent;
 	UPROPERTY(EditDefaultsOnly, Category = "IDENTIFIANT")
-	FString IdDataRow;
+	FName IdDataRow;
 	UPROPERTY(EditDefaultsOnly, Category = "MATERIAL")
 	UMaterialInterface* Material;
 	UPROPERTY(EditDefaultsOnly, Category = "SIZEGRID")
 	FVector2D SizeGrid;
+	UPROPERTY(EditDefaultsOnly, Category = "ObjectType")
+	EObjectType ObjectType;
+
+	void FinishConstruction(FVector2D TilePosition);
 };

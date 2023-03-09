@@ -2,6 +2,7 @@
 
 #include "BuildSystemComponent.h"
 #include "DwarfBarPlayerController.h"
+#include "RestaurantManager.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
@@ -65,9 +66,15 @@ void UBuildSystemComponent::FinishConstruction()
 			TileData.AllTileBatiment = AllPosition;
 			TileData.IdDataRow = DataObjectInHand->IdDataRow;
 			ChunkManager->ChangeTileData(TileData, FVector2D(AllPosition[i].X,AllPosition[i].Y));
+			
 			//TileData.ObjectReference = ConstructionObjectInHand;
-			//TileData.DataObject = DataObjectInHand;
 		}
+		if (DataObjectInHand->ObjectType == EObjectType::Table)
+		{
+			ARestaurantManager* RestaurantManager = Cast<ARestaurantManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ARestaurantManager::StaticClass()));
+			RestaurantManager->AddTable(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y));
+		}
+		
 		DataObjectInHand = nullptr;
 		ConstructionObjectInHand = nullptr;
 	}

@@ -22,7 +22,7 @@ public:
 	}
 	
 	UPROPERTY(EditAnywhere, Category = "Data")
-	FString IdDataRow;
+	FName IdDataRow;
 	UPROPERTY(EditAnywhere, Category = "Position")
 	FVector2D TilePosition;
 	UPROPERTY(EditAnywhere, Category = "Position")
