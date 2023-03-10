@@ -29,9 +29,11 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	UFUNCTION(BlueprintCallable, Category = "Construction")
 	void FinishConstruction();
-	void AddObjectInManager(FVector2D TilePosition, UPDA_Object* DataObject);
+	UFUNCTION(BlueprintCallable, Category = "Construction")
+	void QClick();
 	UFUNCTION(BlueprintCallable, Category = "Construction")
 	void ChangeRotation(bool bReverse);
+		UPROPERTY(EditDefaultsOnly, Category = "REFERENCE")
 	int ActualRotation;
 	UFUNCTION(BlueprintCallable, Category = "Construction")
 	void StartConstruction(UPARAM(DisplayName="DATA Object Ref") UPDA_Object* DataObjectRef);
@@ -41,6 +43,10 @@ public:
 	UMaterialInterface* CanConstructMaterial;
 	UPROPERTY(EditDefaultsOnly, Category = "REFERENCE")
 	UMaterialInterface* CantConstructMaterial;
+	void StopConstruction();
+	void CopyConstruction();
+	void AddObjectInManager(FVector2D TilePosition, UPDA_Object* DataObject);
+
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "REFERENCE")
 	class ADwarfBarPlayerController* DwarfController;

@@ -127,11 +127,33 @@ void AChunk::GenerateChunk(FChunkStruct Data, bool bDataExist)
 						ConstructionObjectInHand->MeshComp->SetStaticMesh(Row->DataObjectRef->MeshComponent);
 						ConstructionObjectInHand->SetActorEnableCollision(true);
 						ConstructionObjectInHand->MeshComp->SetMaterial(0,Row->DataObjectRef->Material);
-						MeshComp->SetMaterial(0,Row->DataObjectRef->Material);
 
-						
+						FTile Tile = ChunkData.TilesArray[Index -1];
+						Tile.ObjectReference = ConstructionObjectInHand;
+						ChunkData.TilesArray[Index -1] = Tile;
+
+						ConstructionObjectInHand->TilePosition = ChunkData.TilesArray[Index-1].TilePosition;
+
+						switch (Tile.Rotation)
+						{
+							case 0:
+								ConstructionObjectInHand->SetActorRotation(FRotator(0,0,0));
+								break;
+							case 1:
+								ConstructionObjectInHand->SetActorRotation(FRotator(0,90,0));
+								break;
+							case 2:
+								ConstructionObjectInHand->SetActorRotation(FRotator(0,180,0));
+								break;
+							case 3:
+								ConstructionObjectInHand->SetActorRotation(FRotator(0,270,0));
+								break;
+							default:
+								ConstructionObjectInHand->SetActorRotation(FRotator(0,0,0));
+								break;
+								
+						}
 					}
-
 					
 					//ChunkData.TilesArray[Index].IdData = 
 				}	

@@ -3,6 +3,8 @@
 
 #include "DefaultObject.h"
 
+#include "ChunkManager.h"
+
 // Sets default values
 ADefaultObject::ADefaultObject()
 {
@@ -23,3 +25,8 @@ void ADefaultObject::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void ADefaultObject::OnRightClick_Implementation()
+{
+	AChunkManager* ChunkManager = Cast<AChunkManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AChunkManager::StaticClass()));
+	ChunkManager->RemoveObjectAtPosition(TilePosition);
+}

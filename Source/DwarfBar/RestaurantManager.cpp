@@ -38,9 +38,46 @@ void ARestaurantManager::AddTable(FVector2D TilePosition)
 		if (!Tile.bIsEmpty)
 		{
 			if (Tile.IdDataRow == "Chair")
-				Data.ChairPosition.Add(AdjacentTile[i]);
+			{
+				if (!ChairToTable.Contains(AdjacentTile[i]))
+				{
+					Data.ChairPosition.Add(AdjacentTile[i]);
+					ChairToTable.Add(AdjacentTile[i], TilePosition);
+				}
+			}
 		}
 	}
 	TableData.Add(TilePosition,Data);
+}
+
+void ARestaurantManager::AddChair(FVector2D TilePosition)
+{
+	TArray<FVector2D> AdjacentTile = ChunkManager->FindAdjcenteTile(TilePosition,1,1);
+	for (int i = 0; i < AdjacentTile.Num(); i++)
+	{
+		FTile Tile = ChunkManager->GetTileAtPosition(AdjacentTile[i]);
+		if (!Tile.bIsEmpty)
+		{
+			if (Tile.IdDataRow == "Table")
+			{
+				if (TableData.Contains(AdjacentTile[i]))
+				{
+					FTableData Data = TableData[AdjacentTile[i]];
+					Data.ChairPosition.Add(TilePosition);
+					ChairToTable.Add(TilePosition, AdjacentTile[i]);
+					TableData[AdjacentTile[i]] = Data;
+					return;
+				}
+			}
+		}	
+	}
+}
+
+void ARestaurantManager::RemoveTable(FVector2D TilePosition)
+{
+}
+
+void ARestaurantManager::RemoveChair(FVector2D TilePosition)
+{
 }
 

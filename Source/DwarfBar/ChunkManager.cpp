@@ -162,7 +162,26 @@ TArray<FVector2D> AChunkManager::FindAdjcenteTile(FVector2D TilePosition, int ha
 
 	return casesAdjacentes;
 }
-	
+
+void AChunkManager::RemoveObjectAtPosition(FVector2D TilePosition)
+{
+	FTile TilePositionRef = GetTileAtPosition(TilePosition);
+	if (!TilePositionRef.bIsEmpty)
+	{
+		for (int i = 0; i < TilePositionRef.AllTileBatiment.Num(); i++)
+		{
+			FTile TileRef = GetTileAtPosition(TilePositionRef.AllTileBatiment[i]);
+			TileRef.bIsEmpty = true;
+			TileRef.AllTileBatiment.Empty();
+			TileRef.IdDataRow = "None";
+			TileRef.ObjectReference = nullptr;
+			ChangeTileData(TileRef, TilePositionRef.AllTileBatiment[i]);
+		}
+
+		TilePositionRef.ObjectReference->Destroy();
+	}
+}
+
 
 FVector2D AChunkManager::GetPlayerChunkPosition()
 {
@@ -186,9 +205,9 @@ TArray<FVector2D> AChunkManager::GetNeightBoorChunk()
 {
 	TArray<FVector2D> ProximityChunk;
 	const FVector2D ChunkPosition = GetPlayerChunkPosition();
-	for (int X = -RangeNeedToBeLoad; X < RangeNeedToBeLoad; X++)
+	for (int X = -(RangeNeedToBeLoad); X < RangeNeedToBeLoad +1 ; X++)
 	{
-		for (int Y = -RangeNeedToBeLoad; Y < RangeNeedToBeLoad; Y++)
+		for (int Y = -(RangeNeedToBeLoad ); Y < RangeNeedToBeLoad+1; Y++)
 		{
 			ProximityChunk.Add(FVector2D(X + ChunkPosition.X, Y + ChunkPosition.Y));
 		}
@@ -295,9 +314,14 @@ void AChunkManager::SaveGame(FChunkStruct Data, FVector2d ChunkPosition)
 	const FString ChunkSaveName = ChunkPosition.ToString();
 	USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(ChunkSaveName, 0);
 	UChunkSaveGame* SaveGameObject = Cast<UChunkSaveGame>(LoadedGame);
+		SaveGameObject->ChunkData.TilesArray.Empty();
 	SaveGameObject->ChunkData = Data;
-	
-	UGameplayStatics::SaveGameToSlot(SaveGameObject, ChunkSaveName, 0);
+		if (SaveGameObject != nullptr)
+			UGameplayStatics::SaveGameToSlot(SaveGameObject, ChunkSaveName, 0);
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ERREUR PTR"), Data.TilesArray.Num());
+		}
 	}
 }
 

@@ -20,14 +20,16 @@ public:
 		IdDataRow = "Cube";
 		bIsEmpty = true;
 	}
-	
+	UPROPERTY(EditAnywhere, Category = "Data")
+	int Rotation;
 	UPROPERTY(EditAnywhere, Category = "Data")
 	FName IdDataRow;
 	UPROPERTY(EditAnywhere, Category = "Position")
 	FVector2D TilePosition;
 	UPROPERTY(EditAnywhere, Category = "Position")
 	bool bIsEmpty;
-	//ADefaultObject* ObjectReference;
+	UPROPERTY(EditAnywhere, Category = "Position")
+	ADefaultObject* ObjectReference;
 	//UPDA_Object* DataObject;
 	UPROPERTY(EditAnywhere, Category = "Position")
 	TArray<FVector2D> AllTileBatiment;
@@ -39,7 +41,7 @@ public:
 		Archive << Tile.bIsEmpty;
 		Archive << Tile.AllTileBatiment;
 		Archive << Tile.TilePosition;
-		
+		Archive << Tile.Rotation;
 		return Archive;
 	}
 };

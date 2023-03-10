@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interface/ClickableInterface.h"
 #include "DefaultObject.generated.h"
 
 UCLASS()
-class DWARFBAR_API ADefaultObject : public AActor
+class DWARFBAR_API ADefaultObject : public AActor, public IClickableInterface
 {
 	GENERATED_BODY()
 	
@@ -18,11 +19,13 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-private:
 
 public:	
 	UStaticMeshComponent* MeshComp;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	FVector2D TilePosition;
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Broadcast")
+			void OnRightClick();  // This is the prototype declared in the interface
+	virtual void OnRightClick_Implementation() override;
 };

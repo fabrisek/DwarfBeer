@@ -27,7 +27,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-	
 	UPROPERTY(EditDefaultsOnly, Category = "Chunk")
 	int SizeChunk = 16;
 	UPROPERTY(EditDefaultsOnly, Category = "Chunk")

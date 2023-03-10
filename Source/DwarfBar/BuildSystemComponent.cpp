@@ -2,8 +2,11 @@
 
 #include "BuildSystemComponent.h"
 #include "DwarfBarPlayerController.h"
+#include "IContentBrowserSingleton.h"
 #include "RestaurantManager.h"
+#include "Engine/DataTable.h"
 #include "Kismet/GameplayStatics.h"
+#include "Structure/FObjectDataTable.h"
 
 // Sets default values for this component's properties
 UBuildSystemComponent::UBuildSystemComponent()
@@ -33,8 +36,26 @@ void UBuildSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	if (bIsOnConstruction && ConstructionObjectInHand != nullptr)
 	{
 		ConstructionObjectInHand->SetActorLocation(FVector(DwarfController->MousePosition.X*100, DwarfController->MousePosition.Y*100, 100));
-		ConstructionObjectInHand->SetActorRotation(FRotator(0,0,0));
-
+		switch (ActualRotation)
+		{
+		case 0:
+			ConstructionObjectInHand->SetActorRotation(FRotator(0,0,0));
+			break;
+		case 1:
+			ConstructionObjectInHand->SetActorRotation(FRotator(0,90,0));
+			UE_LOG(LogTemp, Warning, TEXT("Position non valide : %d"), DwarfController->MousePosition.Y);
+			break;
+		case 2:
+			ConstructionObjectInHand->SetActorRotation(FRotator(0,180,0));
+			break;
+		case 3:
+			ConstructionObjectInHand->SetActorRotation(FRotator(0,270,0));
+			break;
+		default:
+			ConstructionObjectInHand->SetActorRotation(FRotator(0,0,0));
+			break;
+			
+		}
 
 		//Change le material si la tile est valide
 		if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), DataObjectInHand->SizeGrid.X,DataObjectInHand->SizeGrid.Y,ActualRotation))
@@ -67,12 +88,14 @@ void UBuildSystemComponent::FinishConstruction()
 			TileData.bIsEmpty = false;
 			TileData.AllTileBatiment = AllPosition;
 			TileData.IdDataRow = DataObjectInHand->IdDataRow;
+			TileData.ObjectReference = ConstructionObjectInHand;
+			TileData.Rotation = ActualRotation;
 			ChunkManager->ChangeTileData(TileData, FVector2D(AllPosition[i].X,AllPosition[i].Y));
 			
 			//TileData.ObjectReference = ConstructionObjectInHand;
 		}
 		AddObjectInManager(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y),DataObjectInHand );
-		
+		ConstructionObjectInHand->TilePosition = FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y);
 		DataObjectInHand = nullptr;
 		ConstructionObjectInHand = nullptr;
 	}
@@ -90,10 +113,16 @@ void UBuildSystemComponent::AddObjectInManager(FVector2D TilePosition, UPDA_Obje
 		ARestaurantManager* RestaurantManager = Cast<ARestaurantManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ARestaurantManager::StaticClass()));
 		RestaurantManager->AddTable(TilePosition);
 	}
+	if (DataObject->ObjectType == EObjectType::Chair)
+	{
+		ARestaurantManager* RestaurantManager = Cast<ARestaurantManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ARestaurantManager::StaticClass()));
+		RestaurantManager->AddChair(TilePosition);
+	}
 }
 
 void UBuildSystemComponent::ChangeRotation(bool bReverse)
 {
+	UE_LOG(LogTemp, Warning, TEXT("OENJENJFF non valide : %d"), DwarfController->MousePosition.Y);
 	if (bReverse)
 	{
 		ActualRotation--;
@@ -117,6 +146,43 @@ void UBuildSystemComponent::StartConstruction(UPDA_Object* DataObjectRef)
 		ConstructionObjectInHand->SetActorEnableCollision(false);
 		DataObjectInHand = DataObjectRef;
 		bIsOnConstruction = true;
+	}
+}
+
+void UBuildSystemComponent::StopConstruction()
+{
+	ConstructionObjectInHand->Destroy();
+	ConstructionObjectInHand = nullptr;
+	DataObjectInHand = nullptr;
+	bIsOnConstruction = false;
+}
+
+void UBuildSystemComponent::CopyConstruction()
+{
+	FTile TileRef = ChunkManager->GetTileAtPosition(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y));
+	if (TileRef.bIsEmpty == false)
+	{
+		FString DataTablePath = "/Game/DataObject.DataObject";
+		UObject* DataTableObject = StaticLoadObject(UDataTable::StaticClass(), nullptr, *DataTablePath);
+		if (UDataTable* DataTable = Cast<UDataTable>(DataTableObject))
+		{
+			FObjectDataTable* Row = DataTable->FindRow<FObjectDataTable>(TileRef.IdDataRow , TEXT("Cube"));
+			StartConstruction(Row->DataObjectRef);
+			
+		
+		}
+		}
+}
+
+void UBuildSystemComponent::QClick()
+{
+	if (bIsOnConstruction)
+	{
+		StopConstruction();
+	}
+	else
+	{
+		CopyConstruction();
 	}
 }
 

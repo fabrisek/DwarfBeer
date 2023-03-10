@@ -26,8 +26,12 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Info)
 	TMap<FVector2D,FTableData> TableData;
+	TMap<FVector2D, FVector2D> ChairToTable;
 
 	void AddTable(FVector2D TilePosition);
+	void AddChair(FVector2D TilePosition);
+	void RemoveTable(FVector2D TilePosition);
+	void RemoveChair(FVector2D TilePosition);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Info)
 	AChunkManager* ChunkManager;
