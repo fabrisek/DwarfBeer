@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "DwarfBar/ChunkStruct.h"
+#include "ChunkStruct.h"
 #include "GameFramework/SaveGame.h"
 #include "ChunkSaveGame.generated.h"
 
