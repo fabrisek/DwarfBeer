@@ -3,6 +3,8 @@
 
 #include "ChunkManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "SaveGame/ChunkSaveGame.h"
+
 
 // Sets default values
 AChunkManager::AChunkManager()
@@ -309,15 +311,17 @@ void AChunkManager::SaveGame(FChunkStruct Data, FVector2d ChunkPosition)
 {
 	if (Data.TilesArray.Num() > 0)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Valeur de l'en sauvegarde : %d"), Data.TilesArray.Num());
+		const FString ChunkSaveName = ChunkPosition.ToString();
+		USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(ChunkSaveName, 0);
+		UChunkSaveGame* SaveGameObject = Cast<UChunkSaveGame>(LoadedGame);
 		
-	UE_LOG(LogTemp, Warning, TEXT("Valeur de l'en sauvegarde : %d"), Data.TilesArray.Num());
-	const FString ChunkSaveName = ChunkPosition.ToString();
-	USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(ChunkSaveName, 0);
-	UChunkSaveGame* SaveGameObject = Cast<UChunkSaveGame>(LoadedGame);
-		SaveGameObject->ChunkData.TilesArray.Empty();
-	SaveGameObject->ChunkData = Data;
 		if (SaveGameObject != nullptr)
+		{
+			SaveGameObject->ChunkData.TilesArray.Empty();
+			SaveGameObject->ChunkData = Data;
 			UGameplayStatics::SaveGameToSlot(SaveGameObject, ChunkSaveName, 0);
+		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("ERREUR PTR"), Data.TilesArray.Num());

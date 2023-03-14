@@ -3,6 +3,7 @@
 
 #include "RestaurantManager.h"
 #include "FTile.h"
+#include "SaveGame/RestaurantSaveGame.h"
 
 
 // Sets default values
@@ -18,6 +19,18 @@ void ARestaurantManager::BeginPlay()
 	Super::BeginPlay();
 	
 	ChunkManager = Cast<AChunkManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AChunkManager::StaticClass()));
+
+	if (CheckIfSaveExist())
+	{
+		GetSave();
+	}
+		
+}
+
+void ARestaurantManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	SaveGame();
 }
 
 // Called every frame
@@ -79,5 +92,49 @@ void ARestaurantManager::RemoveTable(FVector2D TilePosition)
 
 void ARestaurantManager::RemoveChair(FVector2D TilePosition)
 {
+}
+
+bool ARestaurantManager::CheckIfSaveExist()
+{
+	const FString SaveName = "RestaurantSave";
+	USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(SaveName, 0);
+	URestaurantSaveGame* SaveGameObject = Cast<URestaurantSaveGame>(LoadedGame);
+	
+	if (!SaveGameObject)
+	{
+		SaveGameObject = Cast<URestaurantSaveGame>(UGameplayStatics::CreateSaveGameObject(URestaurantSaveGame::StaticClass()));
+		UGameplayStatics::SaveGameToSlot(SaveGameObject, SaveName, 0);
+		return false;
+	}
+	return true;
+}
+
+void ARestaurantManager::GetSave()
+{
+	const FString SaveName = "RestaurantSave";
+	USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(SaveName, 0);
+	URestaurantSaveGame* SaveGameObject = Cast<URestaurantSaveGame>(LoadedGame);
+
+	if (SaveGameObject != nullptr)
+	{
+		SaveGameObject->TableData.Empty();
+		TableData = SaveGameObject->TableData;
+		SaveGameObject->ChairToTable.Empty();
+		ChairToTable = SaveGameObject->ChairToTable;
+	}
+}
+
+void ARestaurantManager::SaveGame()
+{
+	const FString SaveName = "RestaurantSave";
+	USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(SaveName, 0);
+	URestaurantSaveGame* SaveGameObject = Cast<URestaurantSaveGame>(LoadedGame);
+	
+	if (SaveGameObject != nullptr)
+	{
+		SaveGameObject->TableData = TableData;
+		SaveGameObject->ChairToTable = ChairToTable;
+		UGameplayStatics::SaveGameToSlot(SaveGameObject, SaveName, 0);
+	}
 }
 

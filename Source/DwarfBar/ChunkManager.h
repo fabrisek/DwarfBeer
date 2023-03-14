@@ -6,7 +6,7 @@
 #include <Kismet/GameplayStatics.h>
 #include "GameFramework/Actor.h"
 #include "Chunk.h"
-#include "ChunkSaveGame.h"
+#include "ChunkStruct.h"
 #include "ChunkManager.generated.h"
 
 UCLASS()
