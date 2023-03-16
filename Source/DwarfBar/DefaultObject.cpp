@@ -4,6 +4,8 @@
 #include "DefaultObject.h"
 
 #include "ChunkManager.h"
+#include "NavModifierComponent.h"
+#include "NavAreas/NavArea_Obstacle.h"
 
 // Sets default values
 ADefaultObject::ADefaultObject()
@@ -11,12 +13,15 @@ ADefaultObject::ADefaultObject()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	MeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	UNavModifierComponent* modifier = CreateDefaultSubobject<UNavModifierComponent>(TEXT("Modifier"));
+	modifier->FailsafeExtent = FVector(4,4,4);
+	modifier->AreaClass = UNavArea_Obstacle::StaticClass();
 }
 
 // Called when the game starts or when spawned
 void ADefaultObject::BeginPlay()
 {
-	Super::BeginPlay();
+	Super::BeginPlay();		
 }
 
 // Called every frame

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DwarfBar/Enum/EObjectType.h"
 #include "GameFramework/Actor.h"
 #include "Interface/ClickableInterface.h"
 #include "DefaultObject.generated.h"
@@ -25,6 +26,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	FVector2D TilePosition;
+	UPROPERTY()
+	EObjectType TypeObject;
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Broadcast")
 			void OnRightClick();  // This is the prototype declared in the interface
 	virtual void OnRightClick_Implementation() override;

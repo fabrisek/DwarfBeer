@@ -3,6 +3,7 @@
 
 #include "RestaurantManager.h"
 #include "FTile.h"
+#include "SaveGame/RestaurantSaveGame.h"
 
 
 // Sets default values
@@ -18,13 +19,20 @@ void ARestaurantManager::BeginPlay()
 	Super::BeginPlay();
 	
 	ChunkManager = Cast<AChunkManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AChunkManager::StaticClass()));
+	CheckIfSaveExist();
+}
+
+void ARestaurantManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	SaveGame();
 }
 
 // Called every frame
 void ARestaurantManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	CheckIfNeedCustomers();
 }
 
 void ARestaurantManager::AddTable(FVector2D TilePosition)
@@ -75,9 +83,125 @@ void ARestaurantManager::AddChair(FVector2D TilePosition)
 
 void ARestaurantManager::RemoveTable(FVector2D TilePosition)
 {
+	TableData.Remove(TilePosition);
 }
 
 void ARestaurantManager::RemoveChair(FVector2D TilePosition)
 {
+	if (TableData.Contains(ChairToTable[TilePosition]))
+		TableData[ChairToTable[TilePosition]].ChairPosition.Remove(TilePosition),
+	ChairToTable.Remove(TilePosition);
+}
+
+void ARestaurantManager::AddDoor(FVector2D TilePosition)
+{
+	DoorPosition.Add(TilePosition);
+}
+
+void ARestaurantManager::RemoveDoor(FVector2D TilePosition)
+{
+	DoorPosition.Remove(TilePosition);
+}
+
+void ARestaurantManager::OpenRestaurant()
+{
+	bRestaurantIsOpen = true;
+}
+
+void ARestaurantManager::CloseRestaurant()
+{
+	bRestaurantIsOpen = false;
+}
+
+void ARestaurantManager::KickCustomers()
+{
+	
+}
+
+void ARestaurantManager::CheckIfNeedCustomers()
+{
+	if (bRestaurantIsOpen)
+	{
+		const FTableData FreeTableData = GetFreeTable(1);
+		
+		if (FreeTableData.TilePosition.X != INT_MAX  )
+		{
+			const int MaxChair = FreeTableData.ChairPosition.Num();
+			int rand = FMath::RandRange(1, MaxChair);
+			if(AllNpc.Num() + rand <= ChairToTable.Num() && GroupCustomers.Num() < TableData.Num())
+				SpawnCustomers(rand);
+		}
+	}
+}
+
+void ARestaurantManager::SpawnCustomers_Implementation(int Amount)
+{
+	
+}
+
+void ARestaurantManager::AddCustomer(ANpcCharacter* NpcRef)
+{
+	if (NpcRef != nullptr)
+		AllNpc.Add(NpcRef);
+}
+
+FTableData ARestaurantManager::GetFreeTable(int CustomerCount)
+{
+	for (const TPair<FVector2D, FTableData>& pair : TableData)
+	{
+		if (!pair.Value.bBusyTable && pair.Value.ChairPosition.Num() > 0 && pair.Value.ChairPosition.Num() >= CustomerCount)
+			return pair.Value;
+	}
+	FTableData NullData;
+	return NullData;
+}
+
+int ARestaurantManager::AddGroup(FGroupCustomers NewGroupCustomers)
+{
+	return GroupCustomers.Add(NewGroupCustomers);
+}
+
+FGroupCustomers ARestaurantManager::GetGroupCustomers(int Index)
+{
+	if (Index <  GroupCustomers.Num())
+		return GroupCustomers[Index];
+	else
+	{
+		FGroupCustomers NullGroup;
+		return NullGroup;
+	}
+}
+
+void ARestaurantManager::SaveGame()
+{
+	const FString ChunkSaveName = "RestaurantSave";
+	USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(ChunkSaveName, 0);
+	URestaurantSaveGame* SaveGameObject = Cast<URestaurantSaveGame>(LoadedGame);
+	SaveGameObject->ChairToTable = ChairToTable;
+	SaveGameObject->TableData = TableData;
+	SaveGameObject->DoorPosition = DoorPosition;
+	SaveGameObject->bRestaurantIsOpen = bRestaurantIsOpen;
+	if (SaveGameObject != nullptr)
+		UGameplayStatics::SaveGameToSlot(SaveGameObject, ChunkSaveName, 0);
+	
+}
+
+void ARestaurantManager::CheckIfSaveExist()
+{
+	const FString ChunkSaveName = "RestaurantSave";
+	USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(ChunkSaveName, 0);
+	URestaurantSaveGame* SaveGameObject = Cast<URestaurantSaveGame>(LoadedGame);
+	if (!SaveGameObject)
+	{
+		SaveGameObject = Cast<URestaurantSaveGame>(UGameplayStatics::CreateSaveGameObject(URestaurantSaveGame::StaticClass()));
+		UGameplayStatics::SaveGameToSlot(SaveGameObject, ChunkSaveName, 0);
+	}
+	else
+	{
+		TableData = SaveGameObject->TableData;
+		ChairToTable = SaveGameObject->ChairToTable;
+		DoorPosition = SaveGameObject->DoorPosition;
+		bRestaurantIsOpen = SaveGameObject->bRestaurantIsOpen;
+	}
 }
 

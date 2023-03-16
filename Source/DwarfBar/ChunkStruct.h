@@ -11,6 +11,11 @@
 USTRUCT(BlueprintType)
 struct FChunkStruct
 {
+FChunkStruct()
+{
+	ChunkPosition = FVector2D();
+}
+	
 	GENERATED_BODY();
 public:
 	UPROPERTY(EditAnywhere)

@@ -5,8 +5,7 @@
 #include <Microsoft/COMPointer.h>
 
 #include "ChunkManager.h"
-#include "Engine/DataTable.h"
-#include "Structure/FObjectDataTable.h"
+#include "DwarfGameInstance.h"
 
 
 // Sets default values
@@ -22,6 +21,9 @@ AChunk::AChunk()
 void AChunk::BeginPlay()
 {
 	Super::BeginPlay();
+	const UDwarfGameInstance* MyGameInstance = Cast<UDwarfGameInstance>(GetGameInstance());
+	DataTable = MyGameInstance->DataTable;
+	
 }
 
 // Called every frame
@@ -36,6 +38,7 @@ void AChunk::GenerateChunk(FChunkStruct Data, bool bDataExist)
 	TArray<FVector> MeshPositions;
 	TArray<FVector> MeshNormals;
 	TArray<int32> MeshIndices;
+	FObjectDataTable* Row;
 
 	//Pour les DATA du Chunk
 	ChunkData = Data;
@@ -94,28 +97,13 @@ void AChunk::GenerateChunk(FChunkStruct Data, bool bDataExist)
 			}
 			else
 			{
-				if (ChunkData.TilesArray[Index-1].AllTileBatiment.Num() > 0)
+				if (!ChunkData.TilesArray[Index -1].bIsEmpty)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Valeur position dans le dans chunk : X = %f, Y = %f"), TilePosition.X, TilePosition.Y);
-					UE_LOG(LogTemp, Warning, TEXT("Valeur position dans le dans ARRAY : X = %f, Y = %f"), ChunkData.TilesArray[Index-1].AllTileBatiment[0].X, ChunkData.TilesArray[Index-1].AllTileBatiment[0].Y);
-					UE_LOG(LogTemp, Warning, TEXT("Valeur de diu nombre de case prise : %d"), ChunkData.TilesArray[Index-1].AllTileBatiment.Num());
-
-				}
-				if (!ChunkData.TilesArray[Index -1].bIsEmpty && ChunkData.TilesArray[Index-1].AllTileBatiment[0] == TilePosition)
-				{
-					FString DataTablePath = "/Game/DataObject.DataObject";
-					UObject* DataTableObject = StaticLoadObject(UDataTable::StaticClass(), nullptr, *DataTablePath);
+					if (ChunkData.TilesArray[Index-1].AllTileBatiment[0] == TilePosition)
+					{
+						
 					
-					if (!DataTableObject)
-					{
-						UE_LOG(LogTemp, Error, TEXT("DataTable not found"));
-						return;
-					}
-
-					// Vérifie que l'objet chargé est bien un DataTable
-					if (UDataTable* DataTable = Cast<UDataTable>(DataTableObject))
-					{
-						FObjectDataTable* Row = DataTable->FindRow<FObjectDataTable>(ChunkData.TilesArray[Index-1].IdDataRow , TEXT("Cube"));
+					Row = DataTable->FindRow<FObjectDataTable>(ChunkData.TilesArray[Index-1].IdDataRow , TEXT("Cube"));
 
 						if (!Row)
 						{
@@ -133,7 +121,7 @@ void AChunk::GenerateChunk(FChunkStruct Data, bool bDataExist)
 						ChunkData.TilesArray[Index -1] = Tile;
 
 						ConstructionObjectInHand->TilePosition = ChunkData.TilesArray[Index-1].TilePosition;
-
+						ConstructionObjectInHand->TypeObject = Row->DataObjectRef->ObjectType;
 						switch (Tile.Rotation)
 						{
 							case 0:

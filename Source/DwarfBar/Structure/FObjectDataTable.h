@@ -7,8 +7,9 @@
 USTRUCT(BlueprintType)
 struct FObjectDataTable : public FTableRowBase
 {
-	FObjectDataTable(): DataObjectRef(nullptr)
+	FObjectDataTable()
 	{
+		
 	}
 
 	GENERATED_USTRUCT_BODY()

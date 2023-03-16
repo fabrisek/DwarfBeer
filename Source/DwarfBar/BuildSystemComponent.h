@@ -6,6 +6,7 @@
 #include "ChunkManager.h"
 #include "PDA_Object.h"
 #include "DefaultObject.h"
+#include "DwarfBar/Enum/EObjectType.h"
 #include "Components/ActorComponent.h"
 #include "BuildSystemComponent.generated.h"
 
@@ -33,7 +34,7 @@ public:
 	void QClick();
 	UFUNCTION(BlueprintCallable, Category = "Construction")
 	void ChangeRotation(bool bReverse);
-		UPROPERTY(EditDefaultsOnly, Category = "REFERENCE")
+	UPROPERTY(EditDefaultsOnly, Category = "REFERENCE")
 	int ActualRotation;
 	UFUNCTION(BlueprintCallable, Category = "Construction")
 	void StartConstruction(UPARAM(DisplayName="DATA Object Ref") UPDA_Object* DataObjectRef);

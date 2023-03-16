@@ -7,6 +7,8 @@
 #include "ChunkStruct.h"
 #include <Kismet/GameplayStatics.h>
 #include "FTile.h"
+#include "Engine/DataTable.h"
+#include "Structure/FObjectDataTable.h"
 #include "ProceduralMeshComponent.h"
 #include "Chunk.generated.h"
 UCLASS()
@@ -31,6 +33,8 @@ private:
 	int SizeChunk = 16;
 	UPROPERTY(EditDefaultsOnly, Category = "Chunk")
 	float DistanceCube = 100.0f;
+	UPROPERTY()
+	UDataTable* DataTable;
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Grid")
 	FChunkStruct ChunkData;

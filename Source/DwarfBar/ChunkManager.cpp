@@ -2,6 +2,8 @@
 
 
 #include "ChunkManager.h"
+
+#include "RestaurantManager.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -177,7 +179,24 @@ void AChunkManager::RemoveObjectAtPosition(FVector2D TilePosition)
 			TileRef.ObjectReference = nullptr;
 			ChangeTileData(TileRef, TilePositionRef.AllTileBatiment[i]);
 		}
+		ARestaurantManager* RestaurantManager = Cast<ARestaurantManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ARestaurantManager::StaticClass()));
+		switch (TilePositionRef.ObjectReference->TypeObject)
+		{
+			case EObjectType::Door: 
+				RestaurantManager->RemoveDoor(TilePosition);
+				break;
+			
+			case EObjectType::Table:
+				RestaurantManager->RemoveTable(TilePosition);
+				break;
+			
+			case EObjectType::Chair:
+				RestaurantManager->RemoveChair(TilePosition);
 
+			
+			default:
+				break;
+		}
 		TilePositionRef.ObjectReference->Destroy();
 	}
 }
@@ -314,10 +333,13 @@ void AChunkManager::SaveGame(FChunkStruct Data, FVector2d ChunkPosition)
 	const FString ChunkSaveName = ChunkPosition.ToString();
 	USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(ChunkSaveName, 0);
 	UChunkSaveGame* SaveGameObject = Cast<UChunkSaveGame>(LoadedGame);
-		SaveGameObject->ChunkData.TilesArray.Empty();
-	SaveGameObject->ChunkData = Data;
 		if (SaveGameObject != nullptr)
+		{
+			SaveGameObject->ChunkData.TilesArray.Empty();
+			SaveGameObject->ChunkData = Data;
+
 			UGameplayStatics::SaveGameToSlot(SaveGameObject, ChunkSaveName, 0);
+		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("ERREUR PTR"), Data.TilesArray.Num());
@@ -327,7 +349,6 @@ void AChunkManager::SaveGame(FChunkStruct Data, FVector2d ChunkPosition)
 
 void AChunkManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	Super::EndPlay(EndPlayReason);
 
 	for(int i = 0 ; i < AllPositionChunkLoad.Num(); i++)
 	{
@@ -338,4 +359,5 @@ void AChunkManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
 				SaveGame((*Chunk)->ChunkData, AllPositionChunkLoad[i]);
 			}		
 	}
+	Super::EndPlay(EndPlayReason);
 }

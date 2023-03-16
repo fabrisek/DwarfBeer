@@ -90,10 +90,12 @@ void UBuildSystemComponent::FinishConstruction()
 			TileData.IdDataRow = DataObjectInHand->IdDataRow;
 			TileData.ObjectReference = ConstructionObjectInHand;
 			TileData.Rotation = ActualRotation;
+			
 			ChunkManager->ChangeTileData(TileData, FVector2D(AllPosition[i].X,AllPosition[i].Y));
 			
 			//TileData.ObjectReference = ConstructionObjectInHand;
 		}
+		ConstructionObjectInHand->TypeObject = DataObjectInHand->ObjectType;
 		AddObjectInManager(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y),DataObjectInHand );
 		ConstructionObjectInHand->TilePosition = FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y);
 		DataObjectInHand = nullptr;
@@ -108,15 +110,24 @@ void UBuildSystemComponent::FinishConstruction()
 
 void UBuildSystemComponent::AddObjectInManager(FVector2D TilePosition, UPDA_Object* DataObject)
 {
-	if (DataObject->ObjectType == EObjectType::Table)
+	ARestaurantManager* RestaurantManager = Cast<ARestaurantManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ARestaurantManager::StaticClass()));
+	switch(DataObject->ObjectType)
 	{
-		ARestaurantManager* RestaurantManager = Cast<ARestaurantManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ARestaurantManager::StaticClass()));
-		RestaurantManager->AddTable(TilePosition);
-	}
-	if (DataObject->ObjectType == EObjectType::Chair)
-	{
-		ARestaurantManager* RestaurantManager = Cast<ARestaurantManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ARestaurantManager::StaticClass()));
-		RestaurantManager->AddChair(TilePosition);
+		case EObjectType::Door:
+			RestaurantManager->AddDoor(TilePosition);
+			break;
+
+		case EObjectType::Chair:
+			RestaurantManager->AddChair(TilePosition);
+			break;
+		
+		case EObjectType::Table:
+			RestaurantManager->AddTable(TilePosition);
+			break;
+
+		default:
+
+			break;
 	}
 }
 
