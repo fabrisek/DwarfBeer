@@ -43,4 +43,5 @@ public:
 
 public:
 	void UnloadChunk();
+	void TracerLignesDebogage();
 };

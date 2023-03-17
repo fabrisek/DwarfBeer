@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "Engine/World.h"
 #include "Chunk.h"
 #include <Microsoft/COMPointer.h>
-
 #include "ChunkManager.h"
 #include "DwarfGameInstance.h"
 
@@ -23,6 +23,7 @@ void AChunk::BeginPlay()
 	Super::BeginPlay();
 	const UDwarfGameInstance* MyGameInstance = Cast<UDwarfGameInstance>(GetGameInstance());
 	DataTable = MyGameInstance->DataTable;
+	TracerLignesDebogage();	
 	
 }
 
@@ -35,9 +36,6 @@ void AChunk::Tick(float DeltaTime)
 //Genere le mesh du Chunk
 void AChunk::GenerateChunk(FChunkStruct Data, bool bDataExist)
 {
-	TArray<FVector> MeshPositions;
-	TArray<FVector> MeshNormals;
-	TArray<int32> MeshIndices;
 	FObjectDataTable* Row;
 
 	//Pour les DATA du Chunk
@@ -49,39 +47,6 @@ void AChunk::GenerateChunk(FChunkStruct Data, bool bDataExist)
 		for (int32 Y = 0; Y < SizeChunk; Y++)
 		{
 			Index++;
-			// Calcul des positions des sommets pour chaque carré
-			FVector UpperLeftCorner = FVector(X * DistanceCube, Y * DistanceCube, 0.0f);
-			FVector LowerRightCorner = FVector((X + 1) * DistanceCube, (Y + 1) * DistanceCube, 0.0f);
-			FVector UpperRightCorner = FVector((X + 1) * DistanceCube, Y * DistanceCube, 0.0f);
-			FVector LowerLeftCorner = FVector(X * DistanceCube, (Y + 1) * DistanceCube, 0.0f);
-
-
-			// Ajout des sommets dans le tableau de positions du mesh
-			MeshPositions.Add(UpperLeftCorner);
-			MeshPositions.Add(LowerRightCorner);
-			MeshPositions.Add(LowerLeftCorner);
-			MeshPositions.Add(UpperRightCorner);
-
-			// Calcul de la normale de chaque face du carré
-			FVector FaceNormal = FVector::CrossProduct((LowerLeftCorner - UpperLeftCorner),
-			                                           (UpperRightCorner - UpperLeftCorner)).GetSafeNormal();
-			MeshNormals.Add(FaceNormal);
-			MeshNormals.Add(FaceNormal);
-			MeshNormals.Add(FaceNormal);
-			MeshNormals.Add(FaceNormal);
-
-			// Ajout des indices de chaque triangle dans le tableau d'indices du mesh
-			int32 UpperLeftIndex = X * SizeChunk * 4 + Y * 4;
-			int32 UpperRightIndex = UpperLeftIndex + 3;
-			int32 LowerLeftIndex = UpperLeftIndex + 2;
-			int32 LowerRightIndex = UpperLeftIndex + 1;
-			MeshIndices.Add(UpperLeftIndex);
-			MeshIndices.Add(LowerRightIndex);
-			MeshIndices.Add(LowerLeftIndex);
-			MeshIndices.Add(UpperLeftIndex);
-			MeshIndices.Add(UpperRightIndex);
-			MeshIndices.Add(LowerRightIndex);
-
 			FVector2D TilePosition;
 			
 			TilePosition.X = (ChunkData.ChunkPosition.X * 16) + Y;
@@ -101,9 +66,7 @@ void AChunk::GenerateChunk(FChunkStruct Data, bool bDataExist)
 				{
 					if (ChunkData.TilesArray[Index-1].AllTileBatiment[0] == TilePosition)
 					{
-						
-					
-					Row = DataTable->FindRow<FObjectDataTable>(ChunkData.TilesArray[Index-1].IdDataRow , TEXT("Cube"));
+						Row = DataTable->FindRow<FObjectDataTable>(ChunkData.TilesArray[Index-1].IdDataRow , TEXT("Cube"));
 
 						if (!Row)
 						{
@@ -111,7 +74,8 @@ void AChunk::GenerateChunk(FChunkStruct Data, bool bDataExist)
 							return;
 						}
 
-						ADefaultObject* ConstructionObjectInHand = GetWorld()->SpawnActor<ADefaultObject>(ADefaultObject::StaticClass(), FVector3d(TilePosition.X * DistanceCube,TilePosition.Y * DistanceCube,100) , FRotator());
+						ADefaultObject* ConstructionObjectInHand = GetWorld()->SpawnActor<ADefaultObject>(ADefaultObject::StaticClass(), FVector(TilePosition.X * DistanceCube , TilePosition.Y * DistanceCube , 0.0f), FRotator::ZeroRotator);
+
 						ConstructionObjectInHand->MeshComp->SetStaticMesh(Row->DataObjectRef->MeshComponent);
 						ConstructionObjectInHand->SetActorEnableCollision(true);
 						ConstructionObjectInHand->MeshComp->SetMaterial(0,Row->DataObjectRef->Material);
@@ -142,27 +106,34 @@ void AChunk::GenerateChunk(FChunkStruct Data, bool bDataExist)
 								
 						}
 					}
-					
-					//ChunkData.TilesArray[Index].IdData = 
-				}	
+				}
 			}
 		}
-	}
-
-	// Inversion de la normale en échangeant l'ordre des sommets de chaque triangle
-	for (int32 i = 0; i < MeshIndices.Num(); i += 3)
-	{
-		int32 Temp = MeshIndices[i];
-		MeshIndices[i] = MeshIndices[i + 1];
-		MeshIndices[i + 1] = Temp;
-	}
-
-	MeshComp->CreateMeshSection(0, MeshPositions, MeshIndices, MeshNormals, TArray<FVector2D>(), TArray<FColor>(),
-	                            TArray<FProcMeshTangent>(), true);
 	
+	}
 }
 
 void AChunk::UnloadChunk()
 {
 	Destroy();
+}
+
+void AChunk::TracerLignesDebogage()
+{
+	FVector2D ChunkStart = FVector2D(ChunkData.ChunkPosition.X * SizeChunk, ChunkData.ChunkPosition.Y * SizeChunk);
+	FVector2D ChunkEnd = ChunkStart + FVector2D(SizeChunk, SizeChunk);
+
+	for (float X = ChunkStart.X; X <= ChunkEnd.X; X++)
+	{
+		FVector Start = FVector(X * DistanceCube, ChunkStart.Y * DistanceCube, 0.0f);
+		FVector End = FVector(X * DistanceCube, ChunkEnd.Y * DistanceCube, 0.0f);
+		DrawDebugLine(GetWorld(), Start, End, FColor::Green, true, -1, 0, 1);
+	}
+
+	for (float Y = ChunkStart.Y; Y <= ChunkEnd.Y; Y++)
+	{
+		FVector Start = FVector(ChunkStart.X * DistanceCube, Y * DistanceCube, 0.0f);
+		FVector End = FVector(ChunkEnd.X * DistanceCube, Y * DistanceCube, 0.0f);
+		DrawDebugLine(GetWorld(), Start, End, FColor::Green, true, -1, 0, 1);
+	}
 }

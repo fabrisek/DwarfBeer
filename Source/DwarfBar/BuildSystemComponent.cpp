@@ -35,7 +35,7 @@ void UBuildSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 	if (bIsOnConstruction && ConstructionObjectInHand != nullptr)
 	{
-		ConstructionObjectInHand->SetActorLocation(FVector(DwarfController->MousePosition.X*100, DwarfController->MousePosition.Y*100, 100));
+		ConstructionObjectInHand->SetActorLocation(FVector(DwarfController->MousePosition.X*100 , DwarfController->MousePosition.Y*100 , 0));
 		switch (ActualRotation)
 		{
 		case 0:
