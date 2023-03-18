@@ -9,7 +9,8 @@ struct FObjectDataTable : public FTableRowBase
 {
 	FObjectDataTable()
 	{
-		
+		ObjectName = "None";
+		DataObjectRef = nullptr;
 	}
 
 	GENERATED_USTRUCT_BODY()

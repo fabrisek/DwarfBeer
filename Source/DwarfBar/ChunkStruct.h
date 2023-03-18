@@ -14,6 +14,7 @@ struct FChunkStruct
 FChunkStruct()
 {
 	ChunkPosition = FVector2D();
+	Tiles = TMap<FVector2D,FTile>();
 }
 	
 	GENERATED_BODY();
@@ -21,13 +22,13 @@ public:
 	UPROPERTY(EditAnywhere)
 	FVector2D ChunkPosition;
 	UPROPERTY(EditAnywhere)
-	TArray<FTile> TilesArray;
+	TMap<FVector2D,FTile> Tiles;
 
 	// Serialize the structure
 	friend FArchive& operator<<(FArchive& Archive, FChunkStruct& Chunk)
 	{
 		Archive << Chunk.ChunkPosition;
-		Archive << Chunk.TilesArray;
+		Archive << Chunk.Tiles;
 		return Archive;
 	}
 };

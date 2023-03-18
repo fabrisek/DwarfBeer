@@ -16,8 +16,6 @@ class DWARFBAR_API UChunkSaveGame : public USaveGame
 	GENERATED_BODY()
 
 public:
-
-	UPROPERTY(EditAnywhere, Category = "Grid")
+	UPROPERTY(EditAnywhere)
 	FChunkStruct ChunkData;
-	
 };

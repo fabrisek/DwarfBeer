@@ -26,6 +26,8 @@ class DWARFBAR_API UPDA_Object : public UPrimaryDataAsset
 	FVector2D SizeGrid;
 	UPROPERTY(EditDefaultsOnly, Category = "ObjectType")
 	EObjectType ObjectType;
+	UPROPERTY(EditDefaultsOnly, Category = "ObjectType")
+	bool bIsWall;
 
 	void FinishConstruction(FVector2D TilePosition);
 };

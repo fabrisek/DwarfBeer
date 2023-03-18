@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "DefaultObject.h"
 #include "PDA_Object.h"
+#include "Structure/FObjectTile.h"
 #include "FTile.generated.h"
 
 USTRUCT(BlueprintType)
@@ -17,31 +18,27 @@ public:
 	// Sets default values for this actor's properties
 	FTile()
 	{
-		IdDataRow = "Cube";
-		bIsEmpty = true;
+		TilePosition = FVector2D();
+		ObjectsInTile = TArray<FObjectTile>();
+		AllTileBatiment = TArray<FVector2D>();
 	}
-	UPROPERTY(EditAnywhere, Category = "Data")
-	int Rotation;
-	UPROPERTY(EditAnywhere, Category = "Data")
-	FName IdDataRow;
+
 	UPROPERTY(EditAnywhere, Category = "Position")
 	FVector2D TilePosition;
+	
 	UPROPERTY(EditAnywhere, Category = "Position")
-	bool bIsEmpty;
-	UPROPERTY(EditAnywhere, Category = "Position")
-	ADefaultObject* ObjectReference;
-	//UPDA_Object* DataObject;
+	TArray<FObjectTile> ObjectsInTile;
+	
 	UPROPERTY(EditAnywhere, Category = "Position")
 	TArray<FVector2D> AllTileBatiment;
 
 	// Serialize the structure
 	friend FArchive& operator<<(FArchive& Archive, FTile& Tile)
 	{
-		Archive << Tile.IdDataRow;
-		Archive << Tile.bIsEmpty;
-		Archive << Tile.AllTileBatiment;
 		Archive << Tile.TilePosition;
-		Archive << Tile.Rotation;
+		Archive << Tile.ObjectsInTile;
+		Archive << Tile.AllTileBatiment;
+		
 		return Archive;
 	}
 };

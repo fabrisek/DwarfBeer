@@ -43,14 +43,19 @@ void ARestaurantManager::AddTable(FVector2D TilePosition)
 	for (int i = 0; i < AdjacentTile.Num(); i++)
 	{
 		FTile Tile = ChunkManager->GetTileAtPosition(AdjacentTile[i]);
-		if (!Tile.bIsEmpty)
+
+		for (int j = 0; j < Tile.ObjectsInTile.Num(); j++)
 		{
-			if (Tile.IdDataRow == "Chair")
+			if (Tile.ObjectsInTile[j].TilePositionType == ETilePositionType::InTile)
 			{
-				if (!ChairToTable.Contains(AdjacentTile[i]))
+				
+				if (Tile.ObjectsInTile[j].ObjectDataName != "None" && Tile.ObjectsInTile[j].ObjectDataName == "Chair")
 				{
-					Data.ChairPosition.Add(AdjacentTile[i]);
-					ChairToTable.Add(AdjacentTile[i], TilePosition);
+					if (!ChairToTable.Contains(AdjacentTile[i]))
+					{
+						Data.ChairPosition.Add(AdjacentTile[i]);
+						ChairToTable.Add(AdjacentTile[i], TilePosition);
+					}
 				}
 			}
 		}
@@ -64,20 +69,26 @@ void ARestaurantManager::AddChair(FVector2D TilePosition)
 	for (int i = 0; i < AdjacentTile.Num(); i++)
 	{
 		FTile Tile = ChunkManager->GetTileAtPosition(AdjacentTile[i]);
-		if (!Tile.bIsEmpty)
+		for (int j = 0; j < Tile.ObjectsInTile.Num(); j++)
 		{
-			if (Tile.IdDataRow == "Table")
+			if (Tile.ObjectsInTile[j].TilePositionType == ETilePositionType::InTile)
 			{
-				if (TableData.Contains(AdjacentTile[i]))
+					
+				if (Tile.ObjectsInTile[j].ObjectDataName != "None" && Tile.ObjectsInTile[j].ObjectDataName == "Chair")
 				{
-					FTableData Data = TableData[AdjacentTile[i]];
-					Data.ChairPosition.Add(TilePosition);
-					ChairToTable.Add(TilePosition, AdjacentTile[i]);
-					TableData[AdjacentTile[i]] = Data;
-					return;
+
+					if (TableData.Contains(AdjacentTile[i]))
+					{
+						FTableData Data = TableData[AdjacentTile[i]];
+						Data.ChairPosition.Add(TilePosition);
+						ChairToTable.Add(TilePosition, AdjacentTile[i]);
+						TableData[AdjacentTile[i]] = Data;
+						return;
+					}
 				}
+			
 			}
-		}	
+		}
 	}
 }
 
@@ -88,9 +99,15 @@ void ARestaurantManager::RemoveTable(FVector2D TilePosition)
 
 void ARestaurantManager::RemoveChair(FVector2D TilePosition)
 {
-	if (TableData.Contains(ChairToTable[TilePosition]))
-		TableData[ChairToTable[TilePosition]].ChairPosition.Remove(TilePosition),
-	ChairToTable.Remove(TilePosition);
+	if (ChairToTable.Contains(TilePosition))
+	{
+		if (TableData.Contains(ChairToTable[TilePosition]))
+		{
+			if (TableData[ChairToTable[TilePosition]].ChairPosition.Contains(TilePosition))
+				TableData[ChairToTable[TilePosition]].ChairPosition.Remove(TilePosition);
+		}
+		ChairToTable.Remove(TilePosition);
+	}
 }
 
 void ARestaurantManager::AddDoor(FVector2D TilePosition)

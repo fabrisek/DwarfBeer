@@ -90,21 +90,17 @@ FTile AChunkManager::GetTileAtPosition( FVector2d MousePosition)
 	ChunkPosition.X = FMath::FloorToInt(MousePosition.X / 16);
 	ChunkPosition.Y = FMath::FloorToInt(MousePosition.Y / 16);
 
-	// Récupération de la référence vers le chunk correspondant
-	const AChunk* ChunkRef = ChargedChunk[ChunkPosition];
-
-	// Calcul de l'index de la tuile correspondant à la position de la souris dans le tableau de tuiles du chunk
-	const int TileX = FMath::FloorToInt(MousePosition.X) - (ChunkPosition.X * 16);
-	const int TileY = FMath::FloorToInt(MousePosition.Y) - (ChunkPosition.Y * 16);
-	const int TileIndex = TileX + (TileY * 16);
-
-	// Vérification si l'index est valide
-	if (TileIndex >= 0 && TileIndex < 256)
+	if (ChargedChunk.Contains(ChunkPosition))
 	{
-		return ChargedChunk[ChunkPosition]->ChunkData.TilesArray[TileIndex];
+		if (ChargedChunk[ChunkPosition]->ChunkData.Tiles.Contains(MousePosition))
+		{
+			return ChargedChunk[ChunkPosition]->ChunkData.Tiles[MousePosition];
+		}
 	}
-	FTile tile;
-	return tile;
+
+	FTile Tile;
+	Tile.TilePosition = MousePosition;
+	return Tile;
 }
 
 void AChunkManager::ChangeTileData(FTile TileData, FVector2d MouseTilePosition)
@@ -113,29 +109,60 @@ void AChunkManager::ChangeTileData(FTile TileData, FVector2d MouseTilePosition)
 	FVector2d ChunkPosition;
 	ChunkPosition.X = FMath::FloorToInt(MouseTilePosition.X / 16);
 	ChunkPosition.Y = FMath::FloorToInt(MouseTilePosition.Y / 16);
-
-	// Récupération de la référence vers le chunk correspondant
-	const AChunk* ChunkRef = ChargedChunk[ChunkPosition];
-
-	// Calcul de l'index de la tuile correspondant à la position de la souris dans le tableau de tuiles du chunk
-	const int TileX = FMath::FloorToInt(MouseTilePosition.X) - (ChunkPosition.X * 16);
-	const int TileY = FMath::FloorToInt(MouseTilePosition.Y) - (ChunkPosition.Y * 16);
-	const int TileIndex = TileX + (TileY * 16);
-
-	// Vérification si l'index est valide
-	if (TileIndex >= 0 && TileIndex < 256)
+	
+	if (ChargedChunk[ChunkPosition]->ChunkData.Tiles.Contains(MouseTilePosition))
 	{
-		ChargedChunk[ChunkPosition]->ChunkData.TilesArray[TileIndex] = TileData;
+		ChargedChunk[ChunkPosition]->ChunkData.Tiles[MouseTilePosition] = TileData;
+	}
+	else
+	{
+		ChargedChunk[ChunkPosition]->ChunkData.Tiles.Add(MouseTilePosition, TileData);
+	}
+
+	if (TileData.ObjectsInTile.Num() == 0)
+	{
+		if (ChargedChunk[ChunkPosition]->ChunkData.Tiles.Contains(MouseTilePosition))
+		{
+			ChargedChunk[ChunkPosition]->ChunkData.Tiles.Remove(MouseTilePosition);
+		}
 	}
 }
 
-bool AChunkManager::CheckIfTileIsEmpty(FVector2d MouseTilePosition, int BuildWidth,int BuildHeight, int Rotation)
+bool AChunkManager::CheckIfTileIsEmpty(FVector2d MouseTilePosition, int BuildWidth,int BuildHeight, int Rotation, bool bIsWall)
 {
 	TArray<FVector2D> AllTile = GetAllTilePositions(MouseTilePosition, BuildWidth,BuildHeight,Rotation);
+
 	for (int i = 0; i< AllTile.Num(); i++)
 	{
-		if (!GetTileAtPosition(AllTile[i]).bIsEmpty)
-			return false;
+		if (bIsWall)
+		{
+			if (Rotation == 0 || Rotation == 2)
+			{
+				for(int j = 0; j < GetTileAtPosition(AllTile[i]).ObjectsInTile.Num(); j++)
+				{
+					if (GetTileAtPosition(AllTile[i]).ObjectsInTile[j].TilePositionType == ETilePositionType::Horizontal && GetTileAtPosition(AllTile[i]).ObjectsInTile[j].ObjectReference !=nullptr)
+						return false;
+				}	
+			}	
+		
+			else
+			{
+				for(int j = 0; j < GetTileAtPosition(AllTile[i]).ObjectsInTile.Num(); j++)
+				{
+					if (GetTileAtPosition(AllTile[i]).ObjectsInTile[j].TilePositionType == ETilePositionType::Vertical && GetTileAtPosition(AllTile[i]).ObjectsInTile[j].ObjectReference !=nullptr)
+						return false;
+				}	
+			}
+		}
+	
+		else
+		{
+			for(int j = 0; j < GetTileAtPosition(AllTile[i]).ObjectsInTile.Num(); j++)
+			{
+				if (GetTileAtPosition(AllTile[i]).ObjectsInTile[j].TilePositionType == ETilePositionType::InTile && GetTileAtPosition(AllTile[i]).ObjectsInTile[j].ObjectReference !=nullptr)
+					return false;
+			}	
+		}
 	}
 	return true;
 }
@@ -165,39 +192,79 @@ TArray<FVector2D> AChunkManager::FindAdjcenteTile(FVector2D TilePosition, int ha
 	return casesAdjacentes;
 }
 
-void AChunkManager::RemoveObjectAtPosition(FVector2D TilePosition)
+void AChunkManager::RemoveObjectAtPosition(FVector2D TilePosition, bool bIsWall, int Orientation )
 {
 	FTile TilePositionRef = GetTileAtPosition(TilePosition);
-	if (!TilePositionRef.bIsEmpty)
+	EObjectType TypeObject = EObjectType::Construction;
+	FTile TileRef = TilePositionRef;
+	
+	if (TilePositionRef.ObjectsInTile.Num() > 0)
 	{
-		for (int i = 0; i < TilePositionRef.AllTileBatiment.Num(); i++)
-		{
-			FTile TileRef = GetTileAtPosition(TilePositionRef.AllTileBatiment[i]);
-			TileRef.bIsEmpty = true;
-			TileRef.AllTileBatiment.Empty();
-			TileRef.IdDataRow = "None";
-			TileRef.ObjectReference = nullptr;
-			ChangeTileData(TileRef, TilePositionRef.AllTileBatiment[i]);
-		}
 		ARestaurantManager* RestaurantManager = Cast<ARestaurantManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ARestaurantManager::StaticClass()));
-		switch (TilePositionRef.ObjectReference->TypeObject)
+		
+		if (!bIsWall)
+		{
+			for (int i = 0 ;i < TileRef.ObjectsInTile.Num(); i++)
+			{
+				if (TileRef.ObjectsInTile[i].TilePositionType == ETilePositionType::InTile)
+				{
+					TypeObject= TileRef.ObjectsInTile[i].ObjectReference->TypeObject;
+					TileRef.ObjectsInTile[i].ObjectReference->Destroy();
+					TileRef.ObjectsInTile.RemoveAt(i);
+				}
+			}
+				
+		}
+		else
+		{
+			if (Orientation == 0 || Orientation == 2)
+			{
+				for (int i = 0 ;i < TileRef.ObjectsInTile.Num(); i++)
+				{
+					if (TileRef.ObjectsInTile[i].TilePositionType == ETilePositionType::Horizontal)
+					{
+						TypeObject= TileRef.ObjectsInTile[i].ObjectReference->TypeObject;
+						TileRef.ObjectsInTile[i].ObjectReference->Destroy();
+						TileRef.ObjectsInTile.RemoveAt(i);
+					}
+				}
+			}
+			else
+			{
+				for (int i = 0 ;i < TileRef.ObjectsInTile.Num(); i++)
+				{
+					if (TileRef.ObjectsInTile[i].TilePositionType == ETilePositionType::Vertical)
+					{
+						TypeObject= TileRef.ObjectsInTile[i].ObjectReference->TypeObject;
+						TileRef.ObjectsInTile[i].ObjectReference->Destroy();
+						TileRef.ObjectsInTile.RemoveAt(i);
+					}
+				}
+			}
+		}
+		ChangeTileData(TileRef, TilePosition);
+
+		
+		switch (TypeObject)
 		{
 			case EObjectType::Door: 
 				RestaurantManager->RemoveDoor(TilePosition);
 				break;
-			
+					
 			case EObjectType::Table:
 				RestaurantManager->RemoveTable(TilePosition);
 				break;
-			
+					
 			case EObjectType::Chair:
 				RestaurantManager->RemoveChair(TilePosition);
-
-			
+				
 			default:
 				break;
 		}
-		TilePositionRef.ObjectReference->Destroy();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Row fefefefefef efefefef e fe f efe feferrrrrrrrrrreuuuuuuuuuuuuuuurrrrrrrrrre found"));
 	}
 }
 
@@ -319,32 +386,29 @@ FChunkStruct AChunkManager::GetChunkData(FVector2d ChunkPosition)
 	const FString ChunkSaveName = ChunkPosition.ToString();
 	USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(ChunkSaveName, 0);
 	UChunkSaveGame* SaveGameObject = Cast<UChunkSaveGame>(LoadedGame);
-	UE_LOG(LogTemp, Warning, TEXT("Valeur de la save : %d"), SaveGameObject->ChunkData.TilesArray.Num());
+	UE_LOG(LogTemp, Warning, TEXT("Valeur de la save : %d"), SaveGameObject->ChunkData.Tiles.Num());
 	UE_LOG(LogTemp, Warning, TEXT("Valeur du ChunkPosition : X = %f, Y = %f"), SaveGameObject->ChunkData.ChunkPosition.X, SaveGameObject->ChunkData.ChunkPosition.Y);
 	return SaveGameObject->ChunkData;
 }
 
 void AChunkManager::SaveGame(FChunkStruct Data, FVector2d ChunkPosition)
 {
-	if (Data.TilesArray.Num() > 0)
-	{
-		
-	UE_LOG(LogTemp, Warning, TEXT("Valeur de l'en sauvegarde : %d"), Data.TilesArray.Num());
-	const FString ChunkSaveName = ChunkPosition.ToString();
-	USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(ChunkSaveName, 0);
-	UChunkSaveGame* SaveGameObject = Cast<UChunkSaveGame>(LoadedGame);
+
+		FString ChunkSaveName = ChunkPosition.ToString();
+		USaveGame* LoadedGame = UGameplayStatics::LoadGameFromSlot(ChunkSaveName, 0);
+		UChunkSaveGame* SaveGameObject = Cast<UChunkSaveGame>(LoadedGame);
 		if (SaveGameObject != nullptr)
 		{
-			SaveGameObject->ChunkData.TilesArray.Empty();
+			SaveGameObject->ChunkData.Tiles.Empty();
 			SaveGameObject->ChunkData = Data;
 
 			UGameplayStatics::SaveGameToSlot(SaveGameObject, ChunkSaveName, 0);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("ERREUR PTR"), Data.TilesArray.Num());
+			UE_LOG(LogTemp, Warning, TEXT("ERREUR PTR"), Data.Tiles.Num());
 		}
-	}
+	
 }
 
 void AChunkManager::EndPlay(const EEndPlayReason::Type EndPlayReason)

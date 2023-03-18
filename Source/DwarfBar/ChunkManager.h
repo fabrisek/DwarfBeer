@@ -40,10 +40,10 @@ public:
 	TMap<FVector2D, AChunk*> ChargedChunk;
 
 	void ChangeTileData(FTile TileData, FVector2d MouseTilePosition);
-	bool CheckIfTileIsEmpty(FVector2d TilePosition, int BuildWidth,int BuildHeight, int Rotation);
+	bool CheckIfTileIsEmpty(FVector2d TilePosition, int BuildWidth,int BuildHeight, int Rotation, bool bIsWall);
 	AChunk* GetChunkReference(FVector2d MouseTilePosition);
 	TArray<FVector2D> FindAdjcenteTile(FVector2D TilePosition, int hauteurTile, int longueurTile);
-	void RemoveObjectAtPosition(FVector2D TilePosition);
+	void RemoveObjectAtPosition(FVector2D TilePosition, bool bIsWall, int Orientation );
 	
 private:
 	FVector2D GetPlayerChunkPosition();

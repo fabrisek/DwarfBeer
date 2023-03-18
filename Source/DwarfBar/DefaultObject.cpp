@@ -33,5 +33,13 @@ void ADefaultObject::Tick(float DeltaTime)
 void ADefaultObject::OnRightClick_Implementation()
 {
 	AChunkManager* ChunkManager = Cast<AChunkManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AChunkManager::StaticClass()));
-	ChunkManager->RemoveObjectAtPosition(TilePosition);
+	if (TypeObject == EObjectType::Wall || TypeObject == EObjectType::Door)
+	{
+		ChunkManager->RemoveObjectAtPosition(TilePosition, true, Rotation);
+
+	}
+	else
+	{
+		ChunkManager->RemoveObjectAtPosition(TilePosition, false, Rotation);
+	}
 }

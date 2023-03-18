@@ -36,7 +36,7 @@ private:
 	UPROPERTY()
 	UDataTable* DataTable;
 public:
-	UPROPERTY(EditDefaultsOnly, Category = "Grid")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grid")
 	FChunkStruct ChunkData;
 	void GenerateChunk(FChunkStruct Data, bool bDataExist);
 	UProceduralMeshComponent* MeshComp;

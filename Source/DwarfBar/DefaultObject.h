@@ -26,8 +26,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	FVector2D TilePosition;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Info)
 	EObjectType TypeObject;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Info)
+	int Rotation;
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Broadcast")
 			void OnRightClick();  // This is the prototype declared in the interface
 	virtual void OnRightClick_Implementation() override;

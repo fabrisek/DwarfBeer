@@ -35,77 +35,151 @@ void UBuildSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 	if (bIsOnConstruction && ConstructionObjectInHand != nullptr)
 	{
-		ConstructionObjectInHand->SetActorLocation(FVector(DwarfController->MousePosition.X*100 , DwarfController->MousePosition.Y*100 , 0));
-		switch (ActualRotation)
+		if (DataObjectInHand->ObjectType == EObjectType::Door || DataObjectInHand->ObjectType == EObjectType::Wall)
 		{
-		case 0:
-			ConstructionObjectInHand->SetActorRotation(FRotator(0,0,0));
-			break;
-		case 1:
-			ConstructionObjectInHand->SetActorRotation(FRotator(0,90,0));
-			UE_LOG(LogTemp, Warning, TEXT("Position non valide : %d"), DwarfController->MousePosition.Y);
-			break;
-		case 2:
-			ConstructionObjectInHand->SetActorRotation(FRotator(0,180,0));
-			break;
-		case 3:
-			ConstructionObjectInHand->SetActorRotation(FRotator(0,270,0));
-			break;
-		default:
-			ConstructionObjectInHand->SetActorRotation(FRotator(0,0,0));
-			break;
-			
+			switch (ActualRotation)
+			{
+				case 0:
+					ConstructionObjectInHand->SetActorRotation(FRotator(0,0,0));
+					ConstructionObjectInHand->SetActorLocation(FVector(DwarfController->MousePosition.X *100, DwarfController->MousePosition.Y*100+50 , 0));
+					break;
+				case 1:
+					ConstructionObjectInHand->SetActorRotation(FRotator(0,90,0));
+					ConstructionObjectInHand->SetActorLocation(FVector(DwarfController->MousePosition.X *100+50, DwarfController->MousePosition.Y*100 , 0));
+					break;
+				case 2:
+					ConstructionObjectInHand->SetActorRotation(FRotator(0,180,0));
+					ConstructionObjectInHand->SetActorLocation(FVector(DwarfController->MousePosition.X *100, DwarfController->MousePosition.Y*100+50 , 0));
+					break;
+				case 3:
+					ConstructionObjectInHand->SetActorRotation(FRotator(0,270,0));
+					ConstructionObjectInHand->SetActorLocation(FVector(DwarfController->MousePosition.X *100+50, DwarfController->MousePosition.Y*100 , 0));
+					break;
+				default:
+					ConstructionObjectInHand->SetActorRotation(FRotator(0,0,0));
+					ConstructionObjectInHand->SetActorLocation(FVector(DwarfController->MousePosition.X *100, DwarfController->MousePosition.Y*100+50 , 0));
+					break;
+			}
+			ChangeColorObjectInHand(true);
 		}
 
+		else
+		{
+			ConstructionObjectInHand->SetActorLocation(FVector(DwarfController->MousePosition.X*100 +50, DwarfController->MousePosition.Y*100 +50, 0));
+			
+			switch (ActualRotation)
+			{
+			case 0:
+				ConstructionObjectInHand->SetActorRotation(FRotator(0,0,0));
+				break;
+			case 1:
+				ConstructionObjectInHand->SetActorRotation(FRotator(0,90,0));
+				break;
+			case 2:
+				ConstructionObjectInHand->SetActorRotation(FRotator(0,180,0));
+				break;
+			case 3:
+				ConstructionObjectInHand->SetActorRotation(FRotator(0,270,0));
+				break;
+			default:
+				ConstructionObjectInHand->SetActorRotation(FRotator(0,0,0));
+				break;
+			}
+			ChangeColorObjectInHand(false);
+		}
+	}
+}
+
+void UBuildSystemComponent::ChangeColorObjectInHand(bool bIsWall)
+{
+	if (bIsWall)
+	{
 		//Change le material si la tile est valide
-		if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), DataObjectInHand->SizeGrid.X,DataObjectInHand->SizeGrid.Y,ActualRotation))
+		if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), DataObjectInHand->SizeGrid.X,DataObjectInHand->SizeGrid.Y,ActualRotation, true))
 		{
 			ConstructionObjectInHand->MeshComp->SetMaterial(0,CanConstructMaterial );
 		}
+		else
+		{
+			ConstructionObjectInHand->MeshComp->SetMaterial(0, CantConstructMaterial);
+		}
+	}
+	else
+	{
+		//Change le material si la tile est valide
+		if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), DataObjectInHand->SizeGrid.X,DataObjectInHand->SizeGrid.Y,ActualRotation, false))
+		{
+			ConstructionObjectInHand->MeshComp->SetMaterial(0,CanConstructMaterial );
+		}
+		else
+		{
+			ConstructionObjectInHand->MeshComp->SetMaterial(0, CantConstructMaterial);
+		}
+	}
+}
+FTile UBuildSystemComponent::MakeTileData(bool bIsWall)
+{
+	FTile TileData = ChunkManager->GetTileAtPosition(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y));
+
+			FObjectTile ObjectInTile;
+			ObjectInTile.Rotation = ActualRotation;
+			ObjectInTile.ObjectDataName = DataObjectInHand->IdDataRow;
+			ObjectInTile.ObjectReference = ConstructionObjectInHand;
+			if (bIsWall)
+			{
+				if (ActualRotation == 0 || ActualRotation == 2)
+				{
+					ObjectInTile.TilePositionType = ETilePositionType::Horizontal;
+				}
+				else
+				{
+					ObjectInTile.TilePositionType = ETilePositionType::Vertical;
+				}
+			}
 			else
 			{
-				ConstructionObjectInHand->MeshComp->SetMaterial(0, CantConstructMaterial);
+				ObjectInTile.TilePositionType = ETilePositionType::InTile;
 			}
-	}
-	// ...
+			TileData.ObjectsInTile.Add(ObjectInTile);
+			return TileData;
 }
 
+void UBuildSystemComponent::DepositConstruction()
+{
+	ConstructionObjectInHand->MeshComp->SetMaterial(0, DataObjectInHand->Material);
+	ConstructionObjectInHand->Rotation = ActualRotation;
+	ConstructionObjectInHand->TypeObject = DataObjectInHand->ObjectType;
+	ConstructionObjectInHand->TilePosition = FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y);
+	ConstructionObjectInHand->SetActorEnableCollision(true);
+	DataObjectInHand = nullptr;
+	ConstructionObjectInHand = nullptr;
+}
 
 void UBuildSystemComponent::FinishConstruction()
 {
 	if (bIsOnConstruction)
 	{
-	if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), DataObjectInHand->SizeGrid.X,DataObjectInHand->SizeGrid.Y,ActualRotation))
-	{
-		TArray<FVector2D> AllPosition = ChunkManager->GetAllTilePositions(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), DataObjectInHand->SizeGrid.X,DataObjectInHand->SizeGrid.Y,ActualRotation);
-		ConstructionObjectInHand->SetActorEnableCollision(true);
-		bIsOnConstruction = false;
-		ConstructionObjectInHand->MeshComp->SetMaterial(0, DataObjectInHand->Material);
-		for(int i = 0; i < AllPosition.Num(); i++)
+		if (DataObjectInHand->bIsWall)
 		{
-			
-			FTile TileData = ChunkManager->GetTileAtPosition(FVector2D(AllPosition[i].X,AllPosition[i].Y));
-			TileData.bIsEmpty = false;
-			TileData.AllTileBatiment = AllPosition;
-			TileData.IdDataRow = DataObjectInHand->IdDataRow;
-			TileData.ObjectReference = ConstructionObjectInHand;
-			TileData.Rotation = ActualRotation;
-			
-			ChunkManager->ChangeTileData(TileData, FVector2D(AllPosition[i].X,AllPosition[i].Y));
-			
-			//TileData.ObjectReference = ConstructionObjectInHand;
+			if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), DataObjectInHand->SizeGrid.X,DataObjectInHand->SizeGrid.Y,ActualRotation, true))
+			{
+				bIsOnConstruction = false;
+				ChunkManager->ChangeTileData(MakeTileData(true), FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y));
+				AddObjectInManager(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y),DataObjectInHand );
+				DepositConstruction();
+			}
 		}
-		ConstructionObjectInHand->TypeObject = DataObjectInHand->ObjectType;
-		AddObjectInManager(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y),DataObjectInHand );
-		ConstructionObjectInHand->TilePosition = FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y);
-		DataObjectInHand = nullptr;
-		ConstructionObjectInHand = nullptr;
+		else
+		{
+			if (ChunkManager->CheckIfTileIsEmpty(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y), DataObjectInHand->SizeGrid.X,DataObjectInHand->SizeGrid.Y,ActualRotation, false))
+			{
+				bIsOnConstruction = false;
+				ChunkManager->ChangeTileData(MakeTileData(false), FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y));
+				AddObjectInManager(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y),DataObjectInHand );
+				DepositConstruction();
+			}
+		}
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Position non valide : %d"), DwarfController->MousePosition.Y);
-	}
-	}	
 }
 
 void UBuildSystemComponent::AddObjectInManager(FVector2D TilePosition, UPDA_Object* DataObject)
@@ -170,19 +244,17 @@ void UBuildSystemComponent::StopConstruction()
 
 void UBuildSystemComponent::CopyConstruction()
 {
-	FTile TileRef = ChunkManager->GetTileAtPosition(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y));
-	if (TileRef.bIsEmpty == false)
+	/*FTile TileRef = ChunkManager->GetTileAtPosition(FVector2D(DwarfController->MousePosition.X,DwarfController->MousePosition.Y));
+	if (TileRef.ObjectTileReference != nullptr)
 	{
 		FString DataTablePath = "/Game/DataObject.DataObject";
 		UObject* DataTableObject = StaticLoadObject(UDataTable::StaticClass(), nullptr, *DataTablePath);
 		if (UDataTable* DataTable = Cast<UDataTable>(DataTableObject))
 		{
-			FObjectDataTable* Row = DataTable->FindRow<FObjectDataTable>(TileRef.IdDataRow , TEXT("Cube"));
+			FObjectDataTable* Row = DataTable->FindRow<FObjectDataTable>(TileRef.IdTileDataRow , TEXT("Cube"));
 			StartConstruction(Row->DataObjectRef);
-			
-		
 		}
-		}
+	}*/
 }
 
 void UBuildSystemComponent::QClick()

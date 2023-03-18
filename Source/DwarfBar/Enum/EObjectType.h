@@ -6,5 +6,6 @@ enum class EObjectType : uint8
 	Table,
 	Chair,
 	Construction,
-	Door
+	Door,
+	Wall
 };

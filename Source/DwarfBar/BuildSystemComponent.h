@@ -28,6 +28,9 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void ChangeColorObjectInHand(bool bIsWall);
+	FTile MakeTileData(bool bIsWall);
+	void DepositConstruction();
 	UFUNCTION(BlueprintCallable, Category = "Construction")
 	void FinishConstruction();
 	UFUNCTION(BlueprintCallable, Category = "Construction")
